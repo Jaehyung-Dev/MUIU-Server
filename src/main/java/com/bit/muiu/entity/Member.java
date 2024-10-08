@@ -1,10 +1,12 @@
 package com.bit.muiu.entity;
 
+import com.bit.muiu.dto.MemberDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.sql.Date;
+import java.util.Date;
+
 
 @Entity
 @SequenceGenerator(
@@ -28,17 +30,31 @@ public class Member {
     private String username;
     private String password;
     private String email;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String name;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date birth;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String gender;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String tel;
-    @Column(nullable = false)
-    private Boolean locBool;
+    @Column(nullable = true)
+    private Boolean locationAgree;
     private String role;
-    private Boolean record_consent;
+    private Boolean recordConsent;
 
+    public MemberDto toDto() {
+        return MemberDto.builder()
+                .id(this.id)
+                .username(this.username)
+                .password(this.password)
+                .email(this.email)
+                .birth(this.birth)
+                .gender(this.gender)
+                .tel(this.tel)
+                .role(this.role)
+                .locationAgree(this.locationAgree)
+                .recordConsent(this.recordConsent)
+                .build();
+    }
 }
