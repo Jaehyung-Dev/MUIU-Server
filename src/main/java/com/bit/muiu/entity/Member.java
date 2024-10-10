@@ -3,7 +3,6 @@ package com.bit.muiu.entity;
 import com.bit.muiu.dto.MemberDto;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Date;
 
