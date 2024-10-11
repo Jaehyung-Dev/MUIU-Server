@@ -35,7 +35,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDto join(MemberDto memberDto) {
-        memberDto.setRole("ROLE_USER");
         memberDto.setPassword(passwordEncoder.encode(memberDto.getPassword()));
 
         MemberDto joinedMemberDto = memberRepository.save(memberDto.toEntity()).toDto();
