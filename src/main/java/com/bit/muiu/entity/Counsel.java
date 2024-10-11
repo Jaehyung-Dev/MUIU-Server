@@ -54,4 +54,5 @@ public class Counsel {
         this.counsellorId = counsellor.getId();
         this.clientId = client.getId();
     }
+
 }
