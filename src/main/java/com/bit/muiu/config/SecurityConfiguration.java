@@ -44,7 +44,9 @@ public class SecurityConfiguration {
                             "/sms/send/**",
                             "/api/chat/send",
                             "/api/sms/send-sms/**",
-                            "/diaries/write").permitAll();
+                            "/diaries/write",
+                            "/api/fund/post",
+                            "/api/chat/send").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
