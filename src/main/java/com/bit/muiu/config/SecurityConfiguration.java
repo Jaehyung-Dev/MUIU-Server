@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                             "/members/join",
                             "/members/login",
                             "/sms/send/**",
+                            "/api/fund/post",
                             "/api/chat/send").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
