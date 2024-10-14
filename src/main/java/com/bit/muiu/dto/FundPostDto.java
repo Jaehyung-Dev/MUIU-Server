@@ -13,7 +13,7 @@ import java.util.Date;
 @ToString
 public class FundPostDto {
     private Long postId;
-    private Long id;
+    private String username; // 수정된 부분
     private String title;
     private String description;
     private Long targetAmount;
@@ -28,7 +28,7 @@ public class FundPostDto {
     public FundPost toEntity() {
         return FundPost.builder()
                 .postId(this.postId)
-                .id(this.id)
+                .username(this.username) // 수정된 부분
                 .title(this.title)
                 .description(this.description)
                 .targetAmount(this.targetAmount)
