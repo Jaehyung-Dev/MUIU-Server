@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,14 +20,26 @@ public class FundController {
     private final FundService fundService;
 
     @PostMapping("/post")
-    public ResponseEntity<?> createFundPost(@RequestBody FundPostDto fundPostDto) {
+    public ResponseEntity<?> createFundPost(@RequestBody FundPostDto fundPostDto, @AuthenticationPrincipal UserDetails userDetails) {
         ResponseDto<FundPostDto> responseDto = new ResponseDto<>();
 
         log.info("Received FundPostDto: {}", fundPostDto);
 
         try {
+//            // 인증 정보 확인
+//            if (userDetails == null) {
+//                throw new RuntimeException("사용자 인증 정보가 없습니다. 로그인 후 다시 시도해주세요.");
+//            }
+//
+//            // 세션에서 사용자 이름 가져오기
+//            String loggedInUsername = userDetails.getUsername();
+//            log.info("loggedInUsername: {}", loggedInUsername);
+//            fundPostDto.setUsername(loggedInUsername);
+
+            // DB에 게시글 저장
             FundPostDto savedFundPost = fundService.createFundPost(fundPostDto);
 
+            // 성공 응답
             responseDto.setStatusCode(HttpStatus.CREATED.value());
             responseDto.setStatusMessage("Fund post created successfully");
             responseDto.setItem(savedFundPost);
@@ -38,28 +52,4 @@ public class FundController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
-
-    // 추후 추가 가능: 기부 게시글 삭제
-//    @DeleteMapping("/delete/{id}")
-//    public ResponseEntity<?> deleteFundPost(@PathVariable Long id) {
-//        try {
-//            fundService.deleteFundPost(id);
-//            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-//        } catch (Exception e) {
-//            log.error("Error while deleting fund post: {}", e.getMessage());
-//            return ResponseEntity.internalServerError().body("Failed to delete fund post");
-//        }
-//    }
-
-    // 추후 추가 가능: 기부 게시글 수정
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<?> updateFundPost(@PathVariable Long id, @RequestBody FundPostDto fundPostDto) {
-//        try {
-//            FundPostDto updatedFundPost = fundService.updateFundPost(id, fundPostDto);
-//            return ResponseEntity.ok(updatedFundPost);
-//        } catch (Exception e) {
-//            log.error("Error while updating fund post: {}", e.getMessage());
-//            return ResponseEntity.internalServerError().body("Failed to update fund post");
-//        }
-//    }
 }

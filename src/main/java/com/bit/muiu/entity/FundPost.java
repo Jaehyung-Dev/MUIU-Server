@@ -27,7 +27,7 @@ public class FundPost {
     private Long postId;
 
     @Column(nullable = false)
-    private Long id; // 회원 ID, 다른 테이블과 연결될 FK
+    private String username; // 회원 username, 다른 테이블과 연결될 FK
 
     @Column(nullable = false, length = 30)
     private String title;
@@ -61,7 +61,7 @@ public class FundPost {
     public FundPostDto toDto() {
         return FundPostDto.builder()
                 .postId(this.postId)
-                .id(this.id)
+                .username(this.username) // 수정된 부분
                 .title(this.title)
                 .description(this.description)
                 .targetAmount(this.targetAmount)
