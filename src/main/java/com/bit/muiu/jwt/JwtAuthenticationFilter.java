@@ -54,18 +54,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // username 가져오기
                 String username = jwtProvider.validateAndGetSubject(token);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (username != null) { // 유효한 토큰인 경우에만
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Security Context에 등록될 Authentication Token 객체 생성
-                AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    // Security Context에 등록될 Authentication Token 객체 생성
+                    AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Authentication Token을 Security Context에 등록
-                SecurityContext securityContext = SecurityContextHolder.getContext();
-                securityContext.setAuthentication(authenticationToken);
-                SecurityContextHolder.setContext(securityContext);
+                    // Authentication Token을 Security Context에 등록
+                    SecurityContext securityContext = SecurityContextHolder.getContext();
+                    securityContext.setAuthentication(authenticationToken);
+                    SecurityContextHolder.setContext(securityContext);
+                }
             }
         } catch(Exception e) {
             log.error("set security context error: {}", e.getMessage());
