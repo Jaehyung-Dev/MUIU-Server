@@ -48,7 +48,6 @@ public class Member {
                 .username(this.username)
                 .password(this.password)
                 .email(this.email)
-                .name(this.name)
                 .birth(this.birth)
                 .gender(this.gender)
                 .tel(this.tel)

@@ -15,7 +15,6 @@ public class MemberDto {
     private Long id;
     private String username;
     private String password;
-    private String name;
     private String email;
     private Date birth;
     private String gender;
@@ -30,7 +29,6 @@ public class MemberDto {
                 .id(this.id)
                 .username(this.username)
                 .password(this.password)
-                .name(this.name)
                 .email(this.email)
                 .birth(this.birth)
                 .gender(this.gender)

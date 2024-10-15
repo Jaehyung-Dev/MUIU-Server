@@ -8,23 +8,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/sms")
+@RequestMapping("/api/sms")
 @RequiredArgsConstructor
 public class SmsController {
     private final SmsService smsService;
 
-    @PostMapping("/send/{to}")
-    public ResponseEntity<Map<String,String>> sendSms(@PathVariable("to") String to) {
-        
-        String verificationCode = smsService.sendSms(to); // 인증번호 받기
-
-        Map<String, String> response = new HashMap<>(); // 응답 데이터를 Map에 추가
-        response.put("verificationCode", verificationCode);
-
-        return ResponseEntity.ok(response);
+    @PostMapping("/send-sms/{to}")
+    public ResponseEntity<String>sendSms(@PathVariable("to") String to) {
+        ResponseEntity<String> response = smsService.sendSms(to);
+        return response;
     }
 }
