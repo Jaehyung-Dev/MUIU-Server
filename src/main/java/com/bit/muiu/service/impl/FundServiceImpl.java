@@ -30,6 +30,7 @@ public class FundServiceImpl implements FundService {
             // 파일명을 DB에 저장
             FundPost fundPost = fundPostDto.toEntity(); // DTO를 엔티티로 변환
             fundPost.setMainImage(fileName);  // mainImage 필드에 파일명 설정
+            fundPost.setUsername(fundPostDto.getUsername()); // 사용자 이름 설정
 
             // DB 저장
             FundPost savedFundPost = fundPostRepository.save(fundPost);
