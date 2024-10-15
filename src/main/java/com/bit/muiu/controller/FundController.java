@@ -29,22 +29,22 @@ public class FundController {
         ResponseDto<FundPostDto> responseDto = new ResponseDto<>();
 
         try {
-//            // 인증 정보 확인
-//            if (userDetails == null) {
-//                throw new RuntimeException("사용자 인증 정보가 없습니다. 로그인 후 다시 시도해주세요.");
-//            }
-//
-//            // 세션에서 사용자 이름 가져오기
-//            String loggedInUsername = userDetails.getUsername();
-//            log.info("loggedInUsername: {}", loggedInUsername);
-//            fundPostDto.setUsername(loggedInUsername);
-
             // JSON 데이터를 FundPostDto 객체로 변환
             ObjectMapper mapper = new ObjectMapper();
             FundPostDto fundPostDto = mapper.readValue(postString, FundPostDto.class);
 
             // 확인용 로그
             log.info("Received FundPostDto: {}", fundPostDto);
+
+            // 인증 정보 확인 및 사용자 이름 설정
+            if (userDetails == null) {
+                throw new RuntimeException("사용자 인증 정보가 없습니다. 로그인 후 다시 시도해주세요.");
+            }
+
+            // 세션에서 사용자 이름 가져오기
+            String loggedInUsername = userDetails.getUsername();
+            log.info("loggedInUsername: {}", loggedInUsername);
+            fundPostDto.setUsername(loggedInUsername);
 
             // DB에 저장
             FundPostDto savedFundPost = fundService.createFundPost(fundPostDto, file);
