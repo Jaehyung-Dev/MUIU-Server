@@ -31,6 +31,7 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
      * */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request){
+        logger.info("loadUser() 메소드 시작: clientRegistrationId = {}", request.getClientRegistration().getRegistrationId());
         OAuth2User oAuth2User = super.loadUser(request);
         String providerId = "";
         

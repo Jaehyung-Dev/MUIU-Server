@@ -1,6 +1,7 @@
 package com.bit.muiu.config;
 
 import com.bit.muiu.jwt.JwtAuthenticationFilter;
+import com.bit.muiu.service.impl.OAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OAuth2UserServiceImpl oAuth2UserService;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -38,12 +40,16 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
                     authorizationManagerRequestMatcherRegistry.requestMatchers(
                             "/members/username-check",
-                            "/members/nickname-check",
                             "/members/join",
                             "/members/login",
                             "/api/chat/send",
-                            "/api/sms/send-sms/**").permitAll();
+                            "/sms/send/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
+                })
+                .oauth2Login((oauth2Login) -> {
+                    oauth2Login.userInfoEndpoint(userInfoEndpointConfig -> {
+                        userInfoEndpointConfig.userService(oAuth2UserService);
+                    });
                 })
                 .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
