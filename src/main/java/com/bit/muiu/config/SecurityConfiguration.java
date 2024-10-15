@@ -41,8 +41,8 @@ public class SecurityConfiguration {
                             "/members/nickname-check",
                             "/members/join",
                             "/members/login",
-                            "/api/sms/send-sms/**",
-                            "/diaries/write").permitAll();
+                            "/api/chat/send",
+                            "/api/sms/send-sms/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)

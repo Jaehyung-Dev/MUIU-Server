@@ -15,6 +15,7 @@ public class MemberDto {
     private Long id;
     private String username;
     private String password;
+    private String name;
     private String email;
     private Date birth;
     private String gender;
@@ -22,13 +23,14 @@ public class MemberDto {
     private String role;
     private boolean locationAgree;
     private boolean recordConsent;
-    private String token; // 토큰은 토큰
+    private String token;
 
     public Member toEntity() {
         return Member.builder()
                 .id(this.id)
                 .username(this.username)
                 .password(this.password)
+                .name(this.name)
                 .email(this.email)
                 .birth(this.birth)
                 .gender(this.gender)
