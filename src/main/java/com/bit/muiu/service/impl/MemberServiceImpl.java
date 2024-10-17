@@ -77,12 +77,26 @@ public class MemberServiceImpl implements MemberService {
                 () -> new RuntimeException("User not found")
         );
 
-        // MemberDto로 변환하여 이름과 역할 정보만 설정
         return MemberDto.builder()
                 .id(member.getId())
                 .name(member.getName())
                 .role(member.getRole())
                 .build();
     }
+
+    @Override
+    public void changePassword(Long id, String currentPassword, String newPassword) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+
+        if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+            throw new RuntimeException("기존 비밀번호와 일치하지 않습니다.");
+        }
+
+        member.setPassword(passwordEncoder.encode(newPassword));
+        memberRepository.save(member);
+    }
+
 
 }
