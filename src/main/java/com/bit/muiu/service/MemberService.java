@@ -10,4 +10,8 @@ public interface MemberService {
     MemberDto join(MemberDto memberDto);
 
     MemberDto login(MemberDto memberDto);
+
+    MemberDto getUserById(Long id);
+
+    MemberDto getUsernameAndRoleById(Long id);
 }

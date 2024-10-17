@@ -62,4 +62,27 @@ public class MemberServiceImpl implements MemberService {
 
         return loginMemberDto;
     }
+
+    @Override
+    public MemberDto getUserById(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+        return member.toDto();
+    }
+
+    @Override
+    public MemberDto getUsernameAndRoleById(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+
+        // MemberDto로 변환하여 이름과 역할 정보만 설정
+        return MemberDto.builder()
+                .id(member.getId())
+                .name(member.getName())
+                .role(member.getRole())
+                .build();
+    }
+
 }
