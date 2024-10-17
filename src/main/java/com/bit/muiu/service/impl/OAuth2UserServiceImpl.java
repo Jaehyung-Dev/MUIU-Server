@@ -2,6 +2,7 @@ package com.bit.muiu.service.impl;
 
 import com.bit.muiu.entity.CustomUserDetails;
 import com.bit.muiu.entity.Member;
+import com.bit.muiu.provider.JwtTokenProvider;
 import com.bit.muiu.provider.NaverUserInfo;
 import com.bit.muiu.provider.OAuth2UserInfo;
 import com.bit.muiu.repository.MemberRepository;
@@ -17,13 +18,17 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(OAuth2UserServiceImpl.class);
+    private final JwtTokenProvider jwtTokenProvider;
+
     /*
      * 소셜 로그인 버튼 클릭 -> 인증서버로 요청 -> 인증서버에서 인증코드 발급 -> 발급받은 인증코드를 다시 한번 인증서버로 요청
      * -> 인증서버는 인증코드의 유효성 검사 후 토큰 발급 -> 발급받은 토큰으로 자원서버에 요청 -> 자원서버는 토큰의 유효성을 검사 후 사용자 정보 리턴
@@ -31,7 +36,6 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
      * */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request){
-        logger.info("loadUser() 메소드 시작: clientRegistrationId = {}", request.getClientRegistration().getRegistrationId());
         OAuth2User oAuth2User = super.loadUser(request);
         String providerId = "";
         
@@ -43,14 +47,6 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
             oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
 
             providerId = oAuth2UserInfo.getProviderId();
-
-            // 로그 출력 추가
-            logger.info("Naver Provider Id: {}", providerId);
-            logger.info("Naver Email: {}", oAuth2UserInfo.getEmail());
-            logger.info("Naver Name: {}", oAuth2UserInfo.getName());
-            logger.info("Naver Birth: {}", oAuth2UserInfo.getBirth());
-            logger.info("Naver Gender: {}", oAuth2UserInfo.getGender());
-            logger.info("Naver Mobile: {}", oAuth2UserInfo.getMobile());
         } else if (request.getClientRegistration().getRegistrationId().equals("kakao")) {
 
         } else if(request.getClientRegistration().getRegistrationId().equals("google")) {
@@ -73,10 +69,11 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
         // 소셜 로그인을 했던 이력이 없으면 게시판 DB에 사용자 정보를 저장
         Member member;
 
-        // 소셜 로그인 이력이 있는 경우
-        if(memberRepository.findByUsername(username).isPresent()){
-            member = memberRepository.findByUsername(username).orElseThrow(()-> new RuntimeException("member not exist"));
-            // 소셜 로그인 이력이 없는 경우
+        // 한 번의 findByUsername 호출로 중복을 방지
+        Optional<Member> existingMember = memberRepository.findByUsername(username);
+
+        if (existingMember.isPresent()) {
+            member = existingMember.get();
         } else {
             member = Member.builder()
                     .username(username)
@@ -93,8 +90,11 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
 
             memberRepository.save(member);
         }
+        String token = jwtTokenProvider.createToken(member.getUsername());
+
         return CustomUserDetails.builder()
                 .member(member)
+                .token(token)
                 .attributes(oAuth2User.getAttributes())
                 .build();
     }

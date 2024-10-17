@@ -65,7 +65,15 @@ public class NaverUserInfo implements OAuth2UserInfo{
 
     @Override
     public String getGender() {
-        return this.response.get("gender").toString();
+        String genderCode = this.response.get("gender").toString();
+
+        if ("M".equals(genderCode)) {
+            return "남자";
+        } else if ("F".equals(genderCode)) {
+            return "여자";
+        } else {
+            return "알 수 없음"; // 예외 처리로, 다른 값이 들어왔을 때 대비
+        }
     }
 
     @Override
