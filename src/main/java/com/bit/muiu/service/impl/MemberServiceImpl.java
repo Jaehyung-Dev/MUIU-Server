@@ -98,5 +98,13 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(member);
     }
 
+    public void deleteUser(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+        memberRepository.delete(member);
+    }
+
+
 
 }

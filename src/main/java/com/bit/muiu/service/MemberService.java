@@ -16,4 +16,6 @@ public interface MemberService {
     MemberDto getUsernameAndRoleById(Long id);
 
     void changePassword(Long id, String currentPassword, String newPassword);
+
+    void deleteUser(Long id);
 }
