@@ -139,6 +139,21 @@ public class MemberController {
         }
     }
 
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        ResponseDto<String> responseDto = new ResponseDto<>();
+        try {
+            memberService.deleteUser(id);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("User deleted successfully.");
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("User deletion error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 
 
 
