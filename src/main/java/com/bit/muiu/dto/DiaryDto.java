@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 public class DiaryDto {
-    private Long id; // Member의 id
-    private Long diaryId;
+    private Long id;
+    private Long writer_id;
     private String mood;
     private String title;
     private String content;
