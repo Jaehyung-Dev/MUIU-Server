@@ -1,6 +1,8 @@
 package com.bit.muiu.config;
 
+import com.bit.muiu.entity.CustomUserDetails;
 import com.bit.muiu.jwt.JwtAuthenticationFilter;
+import com.bit.muiu.service.impl.OAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.CorsFilter;
 
@@ -18,6 +21,7 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OAuth2UserServiceImpl oAuth2UserService;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -38,15 +42,23 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
                     authorizationManagerRequestMatcherRegistry.requestMatchers(
                             "/members/username-check",
-                            "/members/nickname-check",
                             "/members/join",
                             "/members/login",
-                            "/sms/send/**",
-                            "/api/fund/post",
-                            "/api/chat/send").permitAll();
+                            "/api/chat/send",
+                            "/sms/send/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfoEndpoint ->
+                                userInfoEndpoint.userService(oAuth2UserService)) // 사용자 정보 서비스 설정
+                        .successHandler((request, response, authentication) -> {
+                            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+                            String token = userDetails.getToken();
+                            // 인증 성공 시 프론트엔드로 리다이렉트
+                            response.sendRedirect("http://localhost:3000/join-success?token=" + token);
+                        }))
                 .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, OAuth2LoginAuthenticationFilter.class)
                 .build();
     }
 }

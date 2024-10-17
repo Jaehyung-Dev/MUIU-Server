@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -85,4 +82,79 @@ public class MemberController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        ResponseDto<MemberDto> responseDto = new ResponseDto<>();
+
+        try {
+            log.info("Fetching user by ID: {}", id);
+            MemberDto memberDto = memberService.getUserById(id);
+
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+            responseDto.setItem(memberDto);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error fetching user by ID: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/{id}/name-role")
+    public ResponseEntity<?> getUserInfoById(@PathVariable Long id) {
+        try {
+            MemberDto memberDto = memberService.getUsernameAndRoleById(id);
+            ResponseDto<MemberDto> responseDto = new ResponseDto<>();
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+            responseDto.setItem(memberDto);
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error fetching user info by ID: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching user info");
+        }
+    }
+
+    @PostMapping("/{id}/change-password")
+    public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody Map<String, String> passwordMap) {
+        ResponseDto<String> responseDto = new ResponseDto<>();
+        try {
+            String currentPassword = passwordMap.get("currentPassword");
+            String newPassword = passwordMap.get("newPassword");
+
+            memberService.changePassword(id, currentPassword, newPassword);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Password updated successfully.");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Password change error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        ResponseDto<String> responseDto = new ResponseDto<>();
+        try {
+            memberService.deleteUser(id);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("User deleted successfully.");
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("User deletion error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+
+
 }

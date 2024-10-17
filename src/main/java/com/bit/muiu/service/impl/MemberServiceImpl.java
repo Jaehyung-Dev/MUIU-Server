@@ -61,4 +61,49 @@ public class MemberServiceImpl implements MemberService {
 
         return loginMemberDto;
     }
+
+    @Override
+    public MemberDto getUserById(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+        return member.toDto();
+    }
+
+    @Override
+    public MemberDto getUsernameAndRoleById(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+
+        return MemberDto.builder()
+                .id(member.getId())
+                .name(member.getName())
+                .role(member.getRole())
+                .build();
+    }
+
+    @Override
+    public void changePassword(Long id, String currentPassword, String newPassword) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+
+        if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+            throw new RuntimeException("기존 비밀번호와 일치하지 않습니다.");
+        }
+
+        member.setPassword(passwordEncoder.encode(newPassword));
+        memberRepository.save(member);
+    }
+
+    public void deleteUser(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+        memberRepository.delete(member);
+    }
+
+
+
 }

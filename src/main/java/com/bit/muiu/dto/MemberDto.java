@@ -23,7 +23,7 @@ public class MemberDto {
     private String role;
     private boolean locationAgree;
     private boolean recordConsent;
-    private String token; // 토큰은 토큰
+    private String token;
 
     public Member toEntity() {
         return Member.builder()
