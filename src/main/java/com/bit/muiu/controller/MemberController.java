@@ -7,8 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -77,6 +80,32 @@ public class MemberController {
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             log.error("login error: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout() {
+        ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
+
+        try {
+            Map<String, String> logoutMsgMap = new HashMap<>();
+
+            SecurityContext securityContext = SecurityContextHolder.getContext();
+            securityContext.setAuthentication(null);
+            SecurityContextHolder.setContext(securityContext);
+
+            logoutMsgMap.put("logoutMsg", "logout success");
+
+            responseDto.setStatusCode(200);
+            responseDto.setStatusMessage("ok");
+            responseDto.setItem(logoutMsgMap);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("logout error: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage(e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
