@@ -74,4 +74,7 @@ public class FundPost {
                 .mainImage(this.mainImage)
                 .build();
     }
+
+
+
 }

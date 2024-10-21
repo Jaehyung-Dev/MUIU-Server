@@ -6,12 +6,18 @@ import com.bit.muiu.service.FundService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+
+import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/fund")
@@ -20,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class FundController {
 
     private final FundService fundService;
+
+    private final String imageUploadPath = "C:\\lecture\\muiu-image\\"; // 이미지 저장 경로
 
     @PostMapping("/post")
     public ResponseEntity<?> createFundPost(
@@ -32,9 +40,6 @@ public class FundController {
             // JSON 데이터를 FundPostDto 객체로 변환
             ObjectMapper mapper = new ObjectMapper();
             FundPostDto fundPostDto = mapper.readValue(postString, FundPostDto.class);
-
-            // 확인용 로그
-            log.info("Received FundPostDto: {}", fundPostDto);
 
             // 인증 정보 확인 및 사용자 이름 설정
             if (userDetails == null) {
@@ -60,6 +65,32 @@ public class FundController {
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage("Failed to create fund post");
             return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000") // 프론트엔드와 동일한 포트로 접근 허용
+    @GetMapping("/posts")
+    public ResponseEntity<List<FundPostDto>> getAllPosts() {
+        try {
+            List<FundPostDto> posts = fundService.getAllPosts();
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            log.error("Error retrieving fund posts: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/image")
+    public ResponseEntity<Resource> returnImage(@RequestParam String imageName) {
+        try {
+            Resource resource = new FileSystemResource(Paths.get(imageUploadPath + imageName));
+            if (!resource.exists()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok().body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
