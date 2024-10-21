@@ -93,4 +93,16 @@ public class FundController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/post/{id}")
+    public ResponseEntity<FundPostDto> getPostById(@PathVariable Long id) {
+        try {
+            FundPostDto post = fundService.getPostById(id);
+            return ResponseEntity.ok(post);
+        } catch (Exception e) {
+            log.error("Error retrieving post: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

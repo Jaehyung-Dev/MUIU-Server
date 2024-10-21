@@ -49,4 +49,12 @@ public class FundServiceImpl implements FundService {
                 .map(FundPost::toDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public FundPostDto getPostById(Long id) {
+        return fundPostRepository.findById(id)
+                .map(FundPost::toDto)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+    }
+
 }
