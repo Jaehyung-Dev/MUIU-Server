@@ -9,4 +9,6 @@ public interface FundService {
     FundPostDto createFundPost(FundPostDto fundPostDto, MultipartFile file);
 
     List<FundPostDto> getAllPosts();
+
+    FundPostDto getPostById(Long id);
 }
