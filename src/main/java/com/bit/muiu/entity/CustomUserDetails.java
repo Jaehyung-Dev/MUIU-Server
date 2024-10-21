@@ -18,6 +18,7 @@ import java.util.Map;
 public class CustomUserDetails implements UserDetails, OAuth2User {
     private Member member;
     private String token;
+    private boolean isNewMember = false;
 
     // 소셜 로그인 시 사용자 정보를 담아줄 Map
     private Map<String, Object> attributes;

@@ -1,6 +1,7 @@
 package com.bit.muiu.service;
 
 import com.bit.muiu.dto.MemberDto;
+import com.bit.muiu.entity.Member;
 
 import java.util.Map;
 
@@ -18,4 +19,6 @@ public interface MemberService {
     void changePassword(Long id, String currentPassword, String newPassword);
 
     void deleteUser(Long id);
+
+    Member getMemberByToken(String token);
 }

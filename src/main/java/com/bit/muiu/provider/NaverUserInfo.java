@@ -68,9 +68,9 @@ public class NaverUserInfo implements OAuth2UserInfo{
         String genderCode = this.response.get("gender").toString();
 
         if ("M".equals(genderCode)) {
-            return "남자";
+            return "남";
         } else if ("F".equals(genderCode)) {
-            return "여자";
+            return "여";
         } else {
             return "알 수 없음"; // 예외 처리로, 다른 값이 들어왔을 때 대비
         }
