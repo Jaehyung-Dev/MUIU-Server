@@ -11,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,5 +40,13 @@ public class FundServiceImpl implements FundService {
         } catch (Exception e) {
             throw new RuntimeException("File upload failed", e);
         }
+    }
+
+    @Override
+    public List<FundPostDto> getAllPosts() {
+        return fundPostRepository.findAll()
+                .stream()
+                .map(FundPost::toDto)
+                .collect(Collectors.toList());
     }
 }
