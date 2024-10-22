@@ -27,20 +27,20 @@ public class Diary {
             strategy = GenerationType.SEQUENCE,
             generator = "diarySeqGenerator"
     )
-    private Long id; // 다이어리의 고유 ID (Primary Key)
+    private Long diary_id; // 다이어리의 고유 ID (Primary Key)
 
     // Many-to-One 관계 설정: 여러 다이어리는 하나의 사용자와 연결될 수 있음
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", referencedColumnName = "id", nullable = false)  // foreign key 설정
     private Member member; // Member 엔티티와의 관계
 
-    @Column(length = 50, nullable = true)
+    @Column(length = 50, nullable = false)
     private String mood; // 기분
 
-    @Column(length = 100, nullable = true)
+    @Column(length = 100, nullable = false)
     private String title; // 제목
 
-    @Column(length = 2000, nullable = true)
+    @Column(length = 2000, nullable = false)
     private String content; // 내용
 
     @CreationTimestamp
@@ -53,8 +53,8 @@ public class Diary {
     // Diary 엔티티를 DiaryDto로 변환
     public DiaryDto toDto() {
         return DiaryDto.builder()
-                .id(this.id)
-                .writer_id(this.member.getId())  // member의 id 가져오기
+                .diary_id(this.diary_id)
+                .id(this.member.getId())  // member의 id 가져오기
                 .mood(this.mood)
                 .title(this.title)
                 .content(this.content)
