@@ -2,18 +2,16 @@ package com.bit.muiu.service.impl;
 
 import com.bit.muiu.entity.CustomUserDetails;
 import com.bit.muiu.entity.Member;
-import com.bit.muiu.provider.JwtTokenProvider;
+import com.bit.muiu.jwt.JwtProvider;
 import com.bit.muiu.provider.NaverUserInfo;
 import com.bit.muiu.provider.OAuth2UserInfo;
 import com.bit.muiu.repository.MemberRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +25,8 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2UserServiceImpl.class);
-    private final JwtTokenProvider jwtTokenProvider;
-
+//    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtProvider jwtProvider;
     /*
      * 소셜 로그인 버튼 클릭 -> 인증서버로 요청 -> 인증서버에서 인증코드 발급 -> 발급받은 인증코드를 다시 한번 인증서버로 요청
      * -> 인증서버는 인증코드의 유효성 검사 후 토큰 발급 -> 발급받은 토큰으로 자원서버에 요청 -> 자원서버는 토큰의 유효성을 검사 후 사용자 정보 리턴
@@ -68,6 +66,7 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
         // 소셜 로그인을 했던 이력이 있으면 그대로 소셜 로그인을 진행하고
         // 소셜 로그인을 했던 이력이 없으면 게시판 DB에 사용자 정보를 저장
         Member member;
+        boolean isNewMember = false;
 
         // 한 번의 findByUsername 호출로 중복을 방지
         Optional<Member> existingMember = memberRepository.findByUsername(username);
@@ -75,6 +74,8 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
         if (existingMember.isPresent()) {
             member = existingMember.get();
         } else {
+            // 신규 회원 처리
+            isNewMember = true;
             member = Member.builder()
                     .username(username)
                     .password(password) // passwordEncoder.encode(nickname)
@@ -90,12 +91,13 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
 
             memberRepository.save(member);
         }
-        String token = jwtTokenProvider.createToken(member.getUsername());
+        String token = jwtProvider.createJwt(member);
 
         return CustomUserDetails.builder()
                 .member(member)
                 .token(token)
                 .attributes(oAuth2User.getAttributes())
+                .isNewMember(isNewMember)
                 .build();
     }
 }

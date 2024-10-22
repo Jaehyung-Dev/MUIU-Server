@@ -2,6 +2,7 @@ package com.bit.muiu.controller;
 
 import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.dto.ResponseDto;
+import com.bit.muiu.entity.Member;
 import com.bit.muiu.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -184,6 +185,38 @@ public class MemberController {
         }
     }
 
+    @GetMapping("/naveruser")
+    public ResponseEntity<Member> getNaverUserInfo(@RequestHeader("Authorization") String token) {
+        // Authorization 헤더에서 'Bearer ' 부분을 제거하고 토큰만 추출
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);  // 'Bearer ' 이후의 토큰만 추출
+        }
 
+        try {
+            // token을 사용해 사용자 정보를 가져오는 로직
+            Member member = memberService.getMemberByToken(token);  // 이 메서드가 토큰 검증 및 사용자 정보 반환
 
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            return ResponseEntity.ok(member);
+        } catch (Exception e) {
+            log.error("Error fetching user with token: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/counselNum/{verifyNumber}")
+    public ResponseEntity<?> verifyNum(@PathVariable String verifyNumber) {
+        try {
+            // memberService의 isEqual 메서드가 true/false를 반환
+            boolean isVerified = memberService.isEqual(verifyNumber);
+
+            return ResponseEntity.ok(isVerified);
+        } catch (Exception e) {
+            log.error("Compare error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
+    }
 }

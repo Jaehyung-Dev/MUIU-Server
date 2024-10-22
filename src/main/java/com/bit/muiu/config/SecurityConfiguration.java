@@ -45,7 +45,8 @@ public class SecurityConfiguration {
                             "/members/join",
                             "/members/login",
                             "/api/chat/send",
-                            "/sms/send/**").permitAll();
+                            "/sms/send/**",
+                            "/members/counselNum/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .oauth2Login(oauth2 -> oauth2
@@ -54,8 +55,16 @@ public class SecurityConfiguration {
                         .successHandler((request, response, authentication) -> {
                             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
                             String token = userDetails.getToken();
+                            boolean isNewMember = userDetails.isNewMember();
+
                             // 인증 성공 시 프론트엔드로 리다이렉트
-                            response.sendRedirect("http://localhost:3000/join-success?token=" + token);
+                            if (isNewMember) {
+                                // 신규 회원일 경우 join-success 페이지로 리다이렉트
+                                response.sendRedirect("http://localhost:3000/join-success?token=" + token);
+                            } else {
+                                // 기존 회원일 경우 메인 페이지로 리다이렉트
+                                response.sendRedirect("http://localhost:3000/main?token=" + token);
+                            }
                         }))
                 .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, OAuth2LoginAuthenticationFilter.class)
