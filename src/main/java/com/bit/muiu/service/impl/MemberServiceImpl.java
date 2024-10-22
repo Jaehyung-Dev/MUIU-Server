@@ -3,6 +3,7 @@ package com.bit.muiu.service.impl;
 import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.entity.Member;
 import com.bit.muiu.jwt.JwtProvider;
+import com.bit.muiu.repository.CounselNumRepository;
 import com.bit.muiu.repository.MemberRepository;
 import com.bit.muiu.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Map;
 public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final CounselNumRepository counselNumRepository;
     private final JwtProvider jwtProvider;
 
     @Override
@@ -117,6 +119,11 @@ public class MemberServiceImpl implements MemberService {
         // 2. 토큰에서 추출한 사용자 이름을 통해 데이터베이스에서 사용자 정보 조회
         return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with token"));
+    }
+
+    @Override
+    public boolean isEqual(String verifyNumber) {
+        return counselNumRepository.findByAuthNum(verifyNumber).isPresent();
     }
 
 
