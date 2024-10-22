@@ -185,7 +185,7 @@ public class MemberController {
         }
     }
 
-    @GetMapping("naveruser")
+    @GetMapping("/naveruser")
     public ResponseEntity<Member> getNaverUserInfo(@RequestHeader("Authorization") String token) {
         // Authorization 헤더에서 'Bearer ' 부분을 제거하고 토큰만 추출
         if (token.startsWith("Bearer ")) {
@@ -207,5 +207,16 @@ public class MemberController {
         }
     }
 
+    @PostMapping("/counselNum/{verifyNumber}")
+    public ResponseEntity<?> verifyNum(@PathVariable String verifyNumber) {
+        try {
+            // memberService의 isEqual 메서드가 true/false를 반환
+            boolean isVerified = memberService.isEqual(verifyNumber);
 
+            return ResponseEntity.ok(isVerified);
+        } catch (Exception e) {
+            log.error("Compare error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
+    }
 }

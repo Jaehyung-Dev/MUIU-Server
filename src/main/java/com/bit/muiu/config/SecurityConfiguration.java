@@ -45,7 +45,8 @@ public class SecurityConfiguration {
                             "/members/join",
                             "/members/login",
                             "/api/chat/send",
-                            "/sms/send/**").permitAll();
+                            "/sms/send/**",
+                            "/members/counselNum/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .oauth2Login(oauth2 -> oauth2
