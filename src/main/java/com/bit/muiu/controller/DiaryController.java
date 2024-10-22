@@ -40,8 +40,8 @@ public class DiaryController {
             Long memberId = member.getId();  // Member의 id 값 가져오기
             log.info("Writing diary for member ID: {}", memberId); // 로그로 확인
 
-            // diaryDto에 memberId 설정
-            diaryDto.setId(memberId);
+            // diaryDto에 memberId 대신 writerId 설정
+            diaryDto.setId(memberId);  // writer_id와 매칭
 
             // 다이어리 저장 로직 호출
             DiaryDto savedDiary = diaryService.writeDiary(diaryDto);
@@ -51,11 +51,17 @@ public class DiaryController {
             responseDto.setItem(savedDiary);
 
             return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            log.error("Error while writing diary: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDto.setStatusMessage("Invalid user or data: " + e.getMessage());
+            return ResponseEntity.badRequest().body(responseDto);
         } catch (Exception e) {
             log.error("Error while writing diary: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage(e.getMessage());
+            responseDto.setStatusMessage("Internal server error: " + e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
 }
+
