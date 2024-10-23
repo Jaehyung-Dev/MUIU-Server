@@ -6,12 +6,9 @@ import com.bit.muiu.repository.FundPostRepository;
 import com.bit.muiu.service.FundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,26 +16,19 @@ import java.util.stream.Collectors;
 public class FundServiceImpl implements FundService {
 
     private final FundPostRepository fundPostRepository;
-    private final String uploadPath = "C:\\lecture\\muiu-image\\"; // 파일이 저장될 경로 지정
 
     @Override
-    public FundPostDto createFundPost(FundPostDto fundPostDto, MultipartFile file) {
+    public FundPostDto createFundPost(FundPostDto fundPostDto) {
         try {
-            // 파일 저장
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadPath + fileName);
-            Files.write(filePath, file.getBytes());
-
-            // 파일명을 DB에 저장
-            FundPost fundPost = fundPostDto.toEntity(); // DTO를 엔티티로 변환
-            fundPost.setMainImage(fileName);  // mainImage 필드에 파일명 설정
+            // DTO를 엔티티로 변환
+            FundPost fundPost = fundPostDto.toEntity();
             fundPost.setUsername(fundPostDto.getUsername()); // 사용자 이름 설정
 
             // DB 저장
             FundPost savedFundPost = fundPostRepository.save(fundPost);
             return savedFundPost.toDto(); // 저장된 엔티티를 다시 DTO로 변환하여 반환
         } catch (Exception e) {
-            throw new RuntimeException("File upload failed", e);
+            throw new RuntimeException("Failed to create fund post", e);
         }
     }
 
@@ -55,6 +45,32 @@ public class FundServiceImpl implements FundService {
         return fundPostRepository.findById(id)
                 .map(FundPost::toDto)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
+    }
+
+    @Override
+    public void updateFundPost(Long postId, FundPostDto fundPostDto) {
+        Optional<FundPost> optionalPost = fundPostRepository.findById(postId);
+
+        if (optionalPost.isPresent()) {
+            FundPost post = optionalPost.get();
+
+            // 기존 데이터를 새로운 데이터로 업데이트
+            post.setTitle(fundPostDto.getTitle());
+            post.setDescription(fundPostDto.getDescription());
+            post.setTeamName(fundPostDto.getTeamName());
+            post.setFundStartDate(fundPostDto.getFundStartDate());
+            post.setFundEndDate(fundPostDto.getFundEndDate());
+            post.setTargetAmount(fundPostDto.getTargetAmount());
+
+            if (fundPostDto.getMainImage() != null) {
+                post.setMainImage(fundPostDto.getMainImage());
+            }
+
+            // 저장
+            fundPostRepository.save(post);
+        } else {
+            throw new RuntimeException("Post not found with id " + postId);
+        }
     }
 
 }
