@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.util.Date;
 
-
 @Entity
 @SequenceGenerator(
         name = "memberSeqGenerator",
@@ -26,21 +25,31 @@ public class Member {
             generator = "memberSeqGenerator"
     )
     private Long id;
+
     private String username;
     private String password;
     private String email;
+
     @Column(nullable = true)
     private String name;
+
     @Column(nullable = true)
     private Date birth;
+
     @Column(nullable = true)
     private String gender;
+
     @Column(nullable = true)
     private String tel;
+
     @Column(nullable = true)
     private Boolean locationAgree;
+
     private String role;
     private Boolean recordConsent;
+
+    @Column(nullable = true)
+    private String profileImageUrl;
 
     public MemberDto toDto() {
         return MemberDto.builder()
@@ -55,6 +64,7 @@ public class Member {
                 .role(this.role)
                 .locationAgree(this.locationAgree)
                 .recordConsent(this.recordConsent)
+                .profileImageUrl(this.profileImageUrl)
                 .build();
     }
 }

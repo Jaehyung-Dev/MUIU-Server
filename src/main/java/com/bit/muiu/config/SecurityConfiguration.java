@@ -45,6 +45,7 @@ public class SecurityConfiguration {
                             "/members/join",
                             "/members/login",
                             "/api/disaster-messages/category",
+                            "/api/profile/upload",
                             "/sms/send/**",
                             "/members/counselNum/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
