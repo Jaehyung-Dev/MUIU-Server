@@ -15,7 +15,20 @@ public class SupportController {
 
     @PostMapping("/contact")
     public ResponseEntity<String> sendContactEmail(@RequestBody SupportRequestDto request) {
-        emailService.sendEmail(request.getEmail(), "문의사항", request.getMessage());
-        return  ResponseEntity.ok("이메일이 전송되었습니다.");
+        String to = "muiu.service@gmail.com";  // 사이트 전용 이메일 주소
+        String subject = "사용자 문의";  // 이메일 제목
+
+        // 사용자 입력을 이메일 본문에 포함
+        String emailContent = String.format(
+                "이름: %s\n이메일: %s\n메시지: %s",
+                request.getName(),
+                request.getEmail(),
+                request.getMessage()
+        );
+
+        // 서비스 호출하여 이메일 발송
+        emailService.sendEmail(to, subject, emailContent);
+
+        return ResponseEntity.ok("이메일이 전송되었습니다.");
     }
 }
