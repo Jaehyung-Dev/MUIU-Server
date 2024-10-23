@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                             "/members/username-check",
                             "/members/join",
                             "/members/login",
-                            "/api/chat/send",
+                            "/api/disaster-messages/category",
                             "/sms/send/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
