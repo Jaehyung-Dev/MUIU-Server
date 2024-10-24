@@ -48,6 +48,8 @@ public class SecurityConfiguration {
                             "/members/{id}/name",
                             "/apis/profile/**",
                             "/sms/send/**",
+                            "/ws/**", // WebSocket 경로 추가
+                            "/topic/**", // STOMP 토픽 경로 추가
                             "/members/counselNum/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
