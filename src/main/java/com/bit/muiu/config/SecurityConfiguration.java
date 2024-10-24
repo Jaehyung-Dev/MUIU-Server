@@ -31,7 +31,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(httpSecurityCorsConfigurer -> {})
+//                .cors(httpSecurityCorsConfigurer -> {})
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(httpSecurityHttpBasicConfigurer -> {
                     httpSecurityHttpBasicConfigurer.disable();
