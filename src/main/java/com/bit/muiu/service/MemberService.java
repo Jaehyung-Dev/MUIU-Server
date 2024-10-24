@@ -23,4 +23,6 @@ public interface MemberService {
     Member getMemberByToken(String token);
 
     boolean isEqual(String verifyNumber);
+
+    MemberDto getNameById(Long id);
 }

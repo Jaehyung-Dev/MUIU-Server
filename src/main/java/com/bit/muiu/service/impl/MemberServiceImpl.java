@@ -126,5 +126,16 @@ public class MemberServiceImpl implements MemberService {
         return counselNumRepository.findByAuthNum(verifyNumber).isPresent();
     }
 
+    @Override
+    public MemberDto getNameById(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+
+        return MemberDto.builder()
+                .name(member.getName())
+                .build();
+    }
+
 
 }

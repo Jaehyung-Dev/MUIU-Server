@@ -45,6 +45,7 @@ public class SecurityConfiguration {
                             "/members/join",
                             "/members/login",
                             "/api/disaster-messages/category",
+                            "/members/{id}/name",
                             "/apis/profile/**",
                             "/sms/send/**",
                             "/members/counselNum/**").permitAll();
