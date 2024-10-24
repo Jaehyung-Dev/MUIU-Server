@@ -149,6 +149,21 @@ public class MemberController {
         }
     }
 
+    @GetMapping("/{id}/name")
+    public ResponseEntity<?> getNameById(@PathVariable Long id) {
+        try{
+            MemberDto memberDto = memberService.getNameById(id);
+            ResponseDto<MemberDto> responseDto = new ResponseDto<>();
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("ok");
+            responseDto.setItem(memberDto);
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error fetching user name by ID: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching user name");
+        }
+    }
+
     @PostMapping("/{id}/change-password")
     public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody Map<String, String> passwordMap) {
         ResponseDto<String> responseDto = new ResponseDto<>();
