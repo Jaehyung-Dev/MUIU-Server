@@ -46,4 +46,19 @@ public class MindColumnServiceImpl implements MindColumnService {
 
         return mindColumnRepository.findAll(pageable).map(MindColumn::toDto);
     }
+
+    @Override
+    public Page<MindColumnDto> findAll(Pageable pageable) {
+        return mindColumnRepository.findAll(pageable).map(MindColumn::toDto);
+    }
+
+    @Override
+    public MindColumnDto findById(Long id) {
+        return mindColumnRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("column is not exist"))
+                .toDto();
+    }
+
+
 }

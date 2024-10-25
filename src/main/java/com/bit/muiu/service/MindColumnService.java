@@ -7,4 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface MindColumnService {
     Page<MindColumnDto> post(MindColumnDto mindColumnDto, MultipartFile[] uploadFiles, Pageable pageable);
+
+    Page<MindColumnDto> findAll(Pageable pageable);
+
+    MindColumnDto findById(Long id);
 }

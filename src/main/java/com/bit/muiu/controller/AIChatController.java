@@ -52,4 +52,5 @@ public class AIChatController {
         result.put("reply", aiResponse);
         return result;
     }
+
 }
