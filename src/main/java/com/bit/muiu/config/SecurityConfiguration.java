@@ -45,7 +45,7 @@ public class SecurityConfiguration {
                             "/members/join",
                             "/members/login",
                             "/api/disaster-messages/category",
-                            "/members/{id}/name",
+                            "/members/{id}/**",
                             "/apis/profile/**",
                             "/sms/send/**",
                             "/ws/**", // WebSocket 경로 추가
