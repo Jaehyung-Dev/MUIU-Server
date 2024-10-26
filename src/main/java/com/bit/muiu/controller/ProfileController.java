@@ -54,15 +54,20 @@ public class ProfileController {
             String fileName = "profile-images/" + customUserDetails.getId() + "/" + file.getOriginalFilename();
             String imageUrl = naverCloudStorageService.uploadFile(file, fileName);
 
+            // URL 확인을 위한 로그 출력
+            System.out.println("Uploaded Image URL: " + imageUrl);
+
             Member member = memberRepository.findById(customUserDetails.getId())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
             member.setProfileImageUrl(imageUrl);
             memberRepository.save(member);
 
-            return ResponseEntity.ok(imageUrl);
+            return ResponseEntity.ok(Map.of("profileImageUrl", imageUrl));
         } catch (IOException e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 중 오류가 발생했습니다.");
         }
     }
+
 
 }

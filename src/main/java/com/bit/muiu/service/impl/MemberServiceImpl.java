@@ -79,7 +79,6 @@ public class MemberServiceImpl implements MemberService {
         );
 
         return MemberDto.builder()
-                .id(member.getId())
                 .name(member.getName())
                 .role(member.getRole())
                 .build();
