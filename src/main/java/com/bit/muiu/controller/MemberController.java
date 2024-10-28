@@ -4,6 +4,7 @@ import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.dto.ResponseDto;
 import com.bit.muiu.entity.Member;
 import com.bit.muiu.service.MemberService;
+import com.bit.muiu.service.impl.NaverServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,8 @@ import java.util.Map;
 @Slf4j
 public class MemberController {
     private final MemberService memberService;
-
+//    private final SocialService socialService;
+    private final NaverServiceImpl naverService;
     @PostMapping("/username-check")
     public ResponseEntity<?> usernameCheck(@RequestBody MemberDto memberDto) {
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
@@ -233,5 +235,13 @@ public class MemberController {
             log.error("Compare error: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
+    }
+
+    @GetMapping("/naver-callback")
+    public ResponseEntity<Object> NaverLogin(@RequestParam String code, @RequestParam String state) {
+        log.info("naver-callback code: {}", code);
+
+        // NaverServiceImpl의 processNaverLogin 메서드 호출
+        return naverService.processNaverLogin(code, state);
     }
 }
