@@ -4,11 +4,14 @@ import com.bit.muiu.dto.ChatMessageDto;
 import com.bit.muiu.dto.ChatPartnerDto;
 import com.bit.muiu.dto.ResponseDto;
 import com.bit.muiu.service.ChatService;
+import com.bit.muiu.service.MemberService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,11 +21,29 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class ChatController {
     private final ChatService chatService;
+    @Autowired
+    private MemberService memberService;
+
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleEntityNotFoundException(EntityNotFoundException e) {
         return e.getMessage();
+    }
+
+    @MessageMapping("/chat/enter")
+    public void enterChatRoom(Long memberId) {
+        memberService.updateMemberStatus(memberId, "WAITING");
+    }
+
+    @MessageMapping("/chat/connect")
+    public void connectChat(Long memberId) {
+        memberService.updateMemberStatus(memberId, "BUSY");
+    }
+
+    @MessageMapping("/chat/exit")
+    public void exitChat(Long memberId) {
+        memberService.updateMemberStatus(memberId, "IDLE");
     }
 
     @GetMapping("/partner/{userId}")

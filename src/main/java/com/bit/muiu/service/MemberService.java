@@ -29,4 +29,6 @@ public interface MemberService {
     void updateAddress(Long id, String address);
 
     String getAddressById(Long id);
+
+    void updateMemberStatus(Long memberId, String status);
 }
