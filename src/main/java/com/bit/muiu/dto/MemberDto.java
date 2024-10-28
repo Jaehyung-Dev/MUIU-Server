@@ -23,6 +23,7 @@ public class MemberDto {
     private String role;
     private boolean locationAgree;
     private boolean recordConsent;
+    private String address;
     private String token;
     private String profileImageUrl;
 
@@ -39,6 +40,7 @@ public class MemberDto {
                 .role(this.role)
                 .locationAgree(this.locationAgree)
                 .recordConsent(this.recordConsent)
+                .address(this.address)
                 .profileImageUrl(this.profileImageUrl)
                 .build();
     }

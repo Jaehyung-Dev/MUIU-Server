@@ -25,4 +25,8 @@ public interface MemberService {
     boolean isEqual(String verifyNumber);
 
     MemberDto getNameById(Long id);
+
+    void updateAddress(Long id, String address);
+
+    String getAddressById(Long id);
 }

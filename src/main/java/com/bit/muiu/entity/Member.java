@@ -48,8 +48,14 @@ public class Member {
     private String role;
     private Boolean recordConsent;
 
+    @Column(name = "address", nullable = true)
+    private String address;
+
     @Column(nullable = true)
     private String profileImageUrl;
+
+    @Column(nullable = false)
+    private String status = "IDLE";
 
     public MemberDto toDto() {
         return MemberDto.builder()
@@ -64,6 +70,7 @@ public class Member {
                 .role(this.role)
                 .locationAgree(this.locationAgree)
                 .recordConsent(this.recordConsent)
+                .address(this.address)
                 .profileImageUrl(this.profileImageUrl)
                 .build();
     }

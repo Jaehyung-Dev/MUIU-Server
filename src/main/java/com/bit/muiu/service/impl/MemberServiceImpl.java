@@ -6,6 +6,7 @@ import com.bit.muiu.jwt.JwtProvider;
 import com.bit.muiu.repository.CounselNumRepository;
 import com.bit.muiu.repository.MemberRepository;
 import com.bit.muiu.service.MemberService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -136,5 +137,19 @@ public class MemberServiceImpl implements MemberService {
                 .build();
     }
 
+    @Override
+    public void updateAddress(Long id, String address) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
 
+        member.setAddress(address);
+        memberRepository.save(member);
+    }
+
+    @Override
+    public String getAddressById(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+        return member.getAddress();
+    }
 }
