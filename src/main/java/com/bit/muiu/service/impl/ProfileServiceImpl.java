@@ -31,7 +31,7 @@ public class ProfileServiceImpl implements ProfileService {
         member.setProfileImageUrl(imageUrl);
         memberRepository.save(member);
 
-        return "https://kr.object.ncloudstorage.com/camp126/" + fileName;
+        return "https://kr.object.ncloudstorage.com/bitcamp126/" + fileName;
     }
 
 }

@@ -51,32 +51,34 @@ public class SecurityConfiguration {
                             "/members/join",
                             "/members/login",
                             "/api/disaster-messages/category",
-                            "/members/{id}/name",
+                            "/members/{id}/**",
                             "/apis/profile/**",
                             "/sms/send/**",
-                            "/ws/**", // WebSocket 경로 추가
-                            "/topic/**", // STOMP 토픽 경로 추가
+                            "/ws/**",
+                            "/topic/**",
+                            "/chat/partner/**",
                             "/ai-counseling",   // 기능구현 완성할 때까지만 임시등록
+                            "/my-websocket",
                             "/members/counselNum/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfoEndpoint ->
-                                userInfoEndpoint.userService(oAuth2UserService)) // 사용자 정보 서비스 설정
-                        .successHandler((request, response, authentication) -> {
-                            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-                            String token = userDetails.getToken();
-                            boolean isNewMember = userDetails.isNewMember();
-
-                            // 인증 성공 시 프론트엔드로 리다이렉트
-                            if (isNewMember) {
-                                // 신규 회원일 경우 join-success 페이지로 리다이렉트
-                                response.sendRedirect("http://localhost:3000/join-success?token=" + token);
-                            } else {
-                                // 기존 회원일 경우 메인 페이지로 리다이렉트
-                                response.sendRedirect("http://localhost:3000/main?token=" + token);
-                            }
-                        }))
+//                .oauth2Login(oauth2 -> oauth2
+//                        .userInfoEndpoint(userInfoEndpoint ->
+//                                userInfoEndpoint.userService(oAuth2UserService)) // 사용자 정보 서비스 설정
+//                        .successHandler((request, response, authentication) -> {
+//                            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+//                            String token = userDetails.getToken();
+//                            boolean isNewMember = userDetails.isNewMember();
+//
+//                            // 인증 성공 시 프론트엔드로 리다이렉트
+//                            if (isNewMember) {
+//                                // 신규 회원일 경우 join-success 페이지로 리다이렉트
+//                                response.sendRedirect("http://localhost:3000/join-success?token=" + token);
+//                            } else {
+//                                // 기존 회원일 경우 메인 페이지로 리다이렉트
+//                                response.sendRedirect("http://localhost:3000/main?token=" + token);
+//                            }
+//                        }))
                 .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, OAuth2LoginAuthenticationFilter.class)
                 .build();
