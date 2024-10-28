@@ -179,10 +179,11 @@ public class MemberController {
         } catch (Exception e) {
             log.error("Password change error: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage(e.getMessage());
+            responseDto.setStatusMessage("An unexpected error occurred.");
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {

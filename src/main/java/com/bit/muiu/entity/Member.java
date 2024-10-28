@@ -51,6 +51,9 @@ public class Member {
     @Column(nullable = true)
     private String profileImageUrl;
 
+    @Column(nullable = false)
+    private String status = "IDLE";
+
     public MemberDto toDto() {
         return MemberDto.builder()
                 .id(this.id)
