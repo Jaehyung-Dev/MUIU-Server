@@ -22,7 +22,6 @@ import java.util.Map;
 @Slf4j
 public class MemberController {
     private final MemberService memberService;
-//    private final SocialService socialService;
     private final NaverServiceImpl naverService;
     @PostMapping("/username-check")
     public ResponseEntity<?> usernameCheck(@RequestBody MemberDto memberDto) {
@@ -181,7 +180,7 @@ public class MemberController {
         } catch (Exception e) {
             log.error("Password change error: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setStatusMessage(e.getMessage());
+            responseDto.setStatusMessage("An unexpected error occurred.");
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
@@ -234,6 +233,40 @@ public class MemberController {
         } catch (Exception e) {
             log.error("Compare error: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
+    }
+
+    @GetMapping("/{id}/address")
+    public ResponseEntity<?> getAddressById(@PathVariable Long id) {
+        ResponseDto<String> responseDto = new ResponseDto<>();
+        try {
+            String address = memberService.getAddressById(id);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Address fetched successfully.");
+            responseDto.setItem(address);
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error fetching address by ID: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Error fetching address");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
+    }
+
+    @PostMapping("/{id}/address")
+    public ResponseEntity<?> updateAddress(@PathVariable Long id, @RequestBody Map<String, String> addressMap) {
+        ResponseDto<String> responseDto = new ResponseDto<>();
+        try {
+            String address = addressMap.get("address");
+            memberService.updateAddress(id, address);
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Address updated successfully.");
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error updating address: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Error updating address");
+            return ResponseEntity.internalServerError().body(responseDto);
         }
     }
 

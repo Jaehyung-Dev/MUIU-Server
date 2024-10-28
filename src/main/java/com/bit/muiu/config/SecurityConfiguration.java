@@ -55,7 +55,9 @@ public class SecurityConfiguration {
                             "/ai-counseling",   // 기능구현 완성할 때까지만 임시등록
                             "/members/counselNum/**",
                             "/mind-column",
-                            "/members/naver-callback").permitAll();
+                            "/members/naver-callback",
+                            "/chat/partner/**",
+                            "/my-websocket").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)

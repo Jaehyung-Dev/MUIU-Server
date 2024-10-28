@@ -46,6 +46,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'org.json:json:20210307'
 }
 
 tasks.named('test') {
