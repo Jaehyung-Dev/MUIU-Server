@@ -57,6 +57,7 @@ public class SecurityConfiguration {
                             "/ws/**", // WebSocket 경로 추가
                             "/topic/**", // STOMP 토픽 경로 추가
                             "/ai-counseling",   // 기능구현 완성할 때까지만 임시등록
+                            "/my-websocket", // WebSocket 경로 추가
                             "/members/counselNum/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
