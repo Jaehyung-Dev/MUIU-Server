@@ -25,7 +25,7 @@ public class JwtProvider {
     // 사용자 정보를 받아서 JWT를 발행하는 메소드
     public String createJwt(Member member) {
         // 토큰 만료일 생성
-        Date expireDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
+        Date expireDate = Date.from(Instant.now().plus(7, ChronoUnit.DAYS));
 
         // JWT 생성하여 리턴
         return Jwts.builder()

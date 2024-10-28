@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class DiaryServiceImpl implements DiaryService {
@@ -29,7 +32,7 @@ public class DiaryServiceImpl implements DiaryService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
 
         // Convert DTO to Entity
-        Diary diary = diaryDto.toEntity();
+        Diary diary = diaryDto.toEntity(member);
 
         // Diary 엔티티에 사용자 정보 설정
         diary.setMember(member);  // `member`와 연결
@@ -39,5 +42,12 @@ public class DiaryServiceImpl implements DiaryService {
 
         // Convert Entity back to DTO and return
         return savedDiary.toDto();
+    }
+
+    public List<DiaryDto> getDiariesByWriterId(Long writerId) {
+        List<Diary> diaries = diaryRepository.findByMemberId(writerId);
+        return diaries.stream()
+                .map(DiaryDto::fromEntity)  // Diary 엔티티를 DiaryDto로 변환
+                .collect(Collectors.toList());
     }
 }

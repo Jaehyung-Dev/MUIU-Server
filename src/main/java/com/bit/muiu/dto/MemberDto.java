@@ -24,6 +24,7 @@ public class MemberDto {
     private boolean locationAgree;
     private boolean recordConsent;
     private String token;
+    private String profileImageUrl;
 
     public Member toEntity() {
         return Member.builder()
@@ -38,6 +39,7 @@ public class MemberDto {
                 .role(this.role)
                 .locationAgree(this.locationAgree)
                 .recordConsent(this.recordConsent)
+                .profileImageUrl(this.profileImageUrl)
                 .build();
     }
 }

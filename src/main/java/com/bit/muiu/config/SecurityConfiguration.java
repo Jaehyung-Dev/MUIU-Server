@@ -14,7 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -31,7 +36,8 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(httpSecurityCorsConfigurer -> {})
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//                .cors(httpSecurityCorsConfigurer -> {})
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(httpSecurityHttpBasicConfigurer -> {
                     httpSecurityHttpBasicConfigurer.disable();
@@ -44,8 +50,13 @@ public class SecurityConfiguration {
                             "/members/username-check",
                             "/members/join",
                             "/members/login",
-                            "/api/chat/send",
+                            "/api/disaster-messages/category",
+                            "/members/{id}/name",
+                            "/apis/profile/**",
                             "/sms/send/**",
+                            "/ws/**", // WebSocket 경로 추가
+                            "/topic/**", // STOMP 토픽 경로 추가
+                            "/ai-counseling",   // 기능구현 완성할 때까지만 임시등록
                             "/members/counselNum/**").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
@@ -69,5 +80,21 @@ public class SecurityConfiguration {
                 .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, OAuth2LoginAuthenticationFilter.class)
                 .build();
+    }
+
+    // **CORS 설정 추가**
+    // 지피티가 넣어보라고 해서 일단 해봄
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // 1시간 캐시
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

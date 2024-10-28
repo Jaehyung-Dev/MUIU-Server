@@ -54,7 +54,7 @@ public class Diary {
     public DiaryDto toDto() {
         return DiaryDto.builder()
                 .diary_id(this.diary_id)
-                .id(this.member.getId())  // member의 id 가져오기
+                .writer_id(this.member.getId())  // member의 id 가져오기
                 .mood(this.mood)
                 .title(this.title)
                 .content(this.content)

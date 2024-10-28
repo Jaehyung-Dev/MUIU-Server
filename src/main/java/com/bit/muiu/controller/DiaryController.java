@@ -14,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/diaries")
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class DiaryController {
             log.info("Writing diary for member ID: {}", memberId); // 로그로 확인
 
             // diaryDto에 memberId 대신 writerId 설정
-            diaryDto.setId(memberId);  // writer_id와 매칭
+            diaryDto.setWriter_id(memberId);  // writer_id와 매칭
 
             // 다이어리 저장 로직 호출
             DiaryDto savedDiary = diaryService.writeDiary(diaryDto);
@@ -58,6 +60,43 @@ public class DiaryController {
             return ResponseEntity.badRequest().body(responseDto);
         } catch (Exception e) {
             log.error("Error while writing diary: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Internal server error: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+    @GetMapping("/my-diaries")
+    public ResponseEntity<?> getMyDiaries() {
+        ResponseDto<List<DiaryDto>> responseDto = new ResponseDto<>();
+
+        try {
+            // 현재 로그인된 사용자 정보 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+
+            // 사용자 정보 가져오기
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
+
+            Long memberId = member.getId();
+            log.info("Fetching diaries for member ID: {}", memberId);
+
+            // 해당 유저의 다이어리 목록 조회
+            List<DiaryDto> diaries = diaryService.getDiariesByWriterId(memberId);
+
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("일기 목록이 성공적으로 조회되었습니다.");
+            responseDto.setItem(diaries);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            log.error("Error while fetching diaries: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDto.setStatusMessage("Invalid user or data: " + e.getMessage());
+            return ResponseEntity.badRequest().body(responseDto);
+        } catch (Exception e) {
+            log.error("Error while fetching diaries: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage("Internal server error: " + e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
