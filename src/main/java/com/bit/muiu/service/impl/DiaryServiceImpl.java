@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +45,7 @@ public class DiaryServiceImpl implements DiaryService {
         return savedDiary.toDto();
     }
 
+    @Override
     public List<DiaryDto> getDiariesByWriterId(Long writerId) {
         List<Diary> diaries = diaryRepository.findByMemberId(writerId);
         return diaries.stream()
@@ -59,6 +61,13 @@ public class DiaryServiceImpl implements DiaryService {
 
         // 엔티티를 DTO로 변환하여 반환
         return diary.toDto();
+    }
+
+    @Override
+    public Optional<DiaryDto> getLatestDiaryByWriterId(Long writerId) {
+        // writerId에 따른 최신 일기 하나만 조회
+        return diaryRepository.findTopByMemberIdOrderByRegdateDesc(writerId)
+                .map(DiaryDto::fromEntity);
     }
 
 }

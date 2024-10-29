@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/diaries")
@@ -65,9 +66,10 @@ public class DiaryController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
-    @GetMapping("/user/{writerId}")
-    public ResponseEntity<?> getDiariesByWriterId(@PathVariable Long writerId) {
-        ResponseDto<List<DiaryDto>> responseDto = new ResponseDto<>();
+
+    @GetMapping("/user/{writerId}/latest")
+    public ResponseEntity<?> getLatestDiaryByWriterId(@PathVariable Long writerId) {
+        ResponseDto<DiaryDto> responseDto = new ResponseDto<>();
 
         try {
             // 현재 로그인된 사용자 정보 가져오기
@@ -75,7 +77,6 @@ public class DiaryController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String username = userDetails.getUsername();
 
-            // 요청한 writerId가 현재 로그인된 사용자의 ID와 일치하는지 확인
             Member member = memberRepository.findByUsername(username)
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
 
@@ -83,27 +84,35 @@ public class DiaryController {
                 throw new IllegalArgumentException("접근 권한이 없습니다.");
             }
 
-            log.info("Fetching diaries for writer ID: {}", writerId);
+            log.info("Fetching latest diary for writer ID: {}", writerId);
 
-            // writerId를 기준으로 다이어리 목록 조회
-            List<DiaryDto> diaries = diaryService.getDiariesByWriterId(writerId);
+            // 최신 일기 하나 조회
+            Optional<DiaryDto> latestDiary = diaryService.getLatestDiaryByWriterId(writerId);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setStatusMessage("일기 목록이 성공적으로 조회되었습니다.");
-            responseDto.setItem(diaries);
-
-            return ResponseEntity.ok(responseDto);
+            if (latestDiary.isPresent()) {
+                log.info("Latest diary found: {}", latestDiary.get()); // 최신 일기 내용 출력
+                responseDto.setStatusCode(HttpStatus.OK.value());
+                responseDto.setStatusMessage("가장 최신 일기 조회 성공");
+                responseDto.setItem(latestDiary.get());
+                return ResponseEntity.ok(responseDto);
+            } else {
+                log.warn("No diary found for writer ID: {}", writerId); // 일기 없음 경고
+                responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
+                responseDto.setStatusMessage("일기를 찾을 수 없습니다.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
+            }
         } catch (IllegalArgumentException e) {
-            log.error("Error while fetching diaries: {}", e.getMessage());
+            log.error("Error while fetching latest diary: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
             responseDto.setStatusMessage("Invalid user or data: " + e.getMessage());
             return ResponseEntity.badRequest().body(responseDto);
         } catch (Exception e) {
-            log.error("Error while fetching diaries: {}", e.getMessage());
+            log.error("Error while fetching latest diary: {}", e.getMessage());
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage("Internal server error: " + e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
 }
 
