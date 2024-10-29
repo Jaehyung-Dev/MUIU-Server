@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,17 +33,17 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/enter")
-    public void enterChatRoom(Long memberId) {
+    public void enterChatRoom(@Payload Long memberId) {
         memberService.updateMemberStatus(memberId, "WAITING");
     }
 
     @MessageMapping("/chat/connect")
-    public void connectChat(Long memberId) {
+    public void connectChat(@Payload Long memberId) {
         memberService.updateMemberStatus(memberId, "BUSY");
     }
 
     @MessageMapping("/chat/exit")
-    public void exitChat(Long memberId) {
+    public void exitChat(@Payload Long memberId) {
         memberService.updateMemberStatus(memberId, "IDLE");
     }
 
