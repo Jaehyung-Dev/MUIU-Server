@@ -1,5 +1,6 @@
 package com.bit.muiu.service;
 
+import com.bit.muiu.dto.ChatPartnerDto;
 import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.entity.Member;
 
