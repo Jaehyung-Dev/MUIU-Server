@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,10 +24,12 @@ public class FundController {
 
     private final FundService fundService;
 
-    @PostMapping("/post")
+    @PostMapping(value = "/post", consumes = {"multipart/form-data"})
     public ResponseEntity<?> createFundPost(
-            @RequestBody FundPostDto fundPostDto,
+            @RequestPart("fundPostDto") FundPostDto fundPostDto,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails) {
+
         ResponseDto<FundPostDto> responseDto = new ResponseDto<>();
 
         try {
@@ -39,6 +42,12 @@ public class FundController {
             String loggedInUsername = userDetails.getUsername();
             log.info("loggedInUsername: {}", loggedInUsername);
             fundPostDto.setUsername(loggedInUsername);
+
+            // 파일이 있을 경우 파일 업로드 수행
+            if (file != null && !file.isEmpty()) {
+                String imageUrl = fundService.uploadImage(file);
+                fundPostDto.setMainImage(imageUrl); // 업로드한 이미지 URL을 DTO에 설정
+            }
 
             // DB에 저장
             FundPostDto savedFundPost = fundService.createFundPost(fundPostDto);
@@ -56,6 +65,9 @@ public class FundController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
+
+
 
     @GetMapping("/posts")
     public ResponseEntity<List<FundPostDto>> getAllPosts() {
@@ -98,6 +110,16 @@ public class FundController {
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage("Error updating fund post: " + e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = fundService.uploadImage(file);  // 업로드한 이미지의 URL 받기
+            return ResponseEntity.ok(imageUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("이미지 업로드 실패");
         }
     }
 
