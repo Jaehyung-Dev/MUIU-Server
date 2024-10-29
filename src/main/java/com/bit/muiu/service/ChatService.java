@@ -18,6 +18,8 @@ import java.util.Optional;
 public class ChatService {
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
 
     @Autowired
     public ChatService(MemberRepository memberRepository) { // 생성자 주입
@@ -25,37 +27,9 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatPartnerDto findChatPartner(Long userId) {
-        Member currentUser = memberRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-
-        List<Member> matchingCandidates = memberRepository.findByStatusAndDifferentRole(
-                "WAITING", currentUser.getRole()
-        );
-
-        if (matchingCandidates.isEmpty()) {
-            throw new EntityNotFoundException("매칭 가능한 채팅 상대를 찾을 수 없습니다.");
-        }
-
-        Member partner = matchingCandidates.get(0);
-
-        // 두 사용자 모두 BUSY로 설정
-        currentUser.setStatus("BUSY");
-        partner.setStatus("BUSY");
-
-        memberRepository.save(currentUser);
-        memberRepository.save(partner);
-
-        return new ChatPartnerDto(partner.getName(), partner.getRole(), partner.getId());
-    }
-
-
-
-    @Transactional
     public void updateStatusToBusy(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        member.setStatus("BUSY");
         memberRepository.save(member);
     }
 
@@ -63,7 +37,6 @@ public class ChatService {
     public void updateStatusToWaiting(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        member.setStatus("WAITING");
         memberRepository.save(member);
     }
 
@@ -71,7 +44,18 @@ public class ChatService {
     public void updateStatusToIdle(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        member.setStatus("IDLE");
-        memberRepository.save(member);
+
+        ChatRoom chatRoom = chatRoomRepository.findByClientIdOrCounselorId(memberId, memberId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+
+        if (member.getRole().equals("ROLE_USER")) {
+            chatRoom.setStatus("WAITING");
+        }
+
+        chatRoomRepository.save(chatRoom);
     }
+
+
+
+
 }

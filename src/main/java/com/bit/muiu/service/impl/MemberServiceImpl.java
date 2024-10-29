@@ -161,7 +161,12 @@ public class MemberServiceImpl implements MemberService {
     public void updateMemberStatus(Long memberId, String status) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        member.setStatus(status);
         memberRepository.save(member);
+    }
+
+    @Override
+    public Member findById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }
