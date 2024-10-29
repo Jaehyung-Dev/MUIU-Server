@@ -13,4 +13,6 @@ public interface FundService {
     FundPostDto getPostById(Long id);
 
     void updateFundPost(Long postId, FundPostDto fundPostDto);
+
+    String uploadImage(MultipartFile file);
 }
