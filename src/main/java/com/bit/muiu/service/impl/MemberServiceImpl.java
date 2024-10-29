@@ -1,5 +1,6 @@
 package com.bit.muiu.service.impl;
 
+import com.bit.muiu.dto.ChatPartnerDto;
 import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.entity.Member;
 import com.bit.muiu.jwt.JwtProvider;
@@ -7,12 +8,14 @@ import com.bit.muiu.repository.CounselNumRepository;
 import com.bit.muiu.repository.MemberRepository;
 import com.bit.muiu.service.MemberService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -153,12 +156,12 @@ public class MemberServiceImpl implements MemberService {
         return member.getAddress();
     }
 
+    @Transactional
     @Override
     public void updateMemberStatus(Long memberId, String status) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         member.setStatus(status);
         memberRepository.save(member);
-        System.out.println("Member status updated to " + status + " for memberId: " + memberId); // 상태 업데이트 로그
     }
 }

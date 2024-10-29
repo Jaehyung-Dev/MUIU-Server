@@ -45,8 +45,8 @@ public class FundController {
 
             // 파일이 있을 경우 파일 업로드 수행
             if (file != null && !file.isEmpty()) {
-                String imageUrl = fundService.uploadImage(file);
-                fundPostDto.setMainImage(imageUrl); // 업로드한 이미지 URL을 DTO에 설정
+                // String imageUrl = fundService.uploadImage(file);
+                // fundPostDto.setMainImage(imageUrl); // 업로드한 이미지 URL을 DTO에 설정
             }
 
             // DB에 저장
@@ -115,12 +115,13 @@ public class FundController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
-        try {
-            String imageUrl = fundService.uploadImage(file);  // 업로드한 이미지의 URL 받기
-            return ResponseEntity.ok(imageUrl);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("이미지 업로드 실패");
-        }
+//        try {
+//            String imageUrl = fundService.uploadImage(file);  // 업로드한 이미지의 URL 받기
+//            return ResponseEntity.ok(imageUrl);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body("이미지 업로드 실패");
+//        }
+        return null;
     }
 
 
