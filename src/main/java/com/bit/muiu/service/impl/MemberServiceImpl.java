@@ -152,4 +152,13 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
         return member.getAddress();
     }
+
+    @Override
+    public void updateMemberStatus(Long memberId, String status) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+        member.setStatus(status);
+        memberRepository.save(member);
+        System.out.println("Member status updated to " + status + " for memberId: " + memberId); // 상태 업데이트 로그
+    }
 }
