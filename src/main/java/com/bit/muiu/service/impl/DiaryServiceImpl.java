@@ -50,4 +50,15 @@ public class DiaryServiceImpl implements DiaryService {
                 .map(DiaryDto::fromEntity)  // Diary 엔티티를 DiaryDto로 변환
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public DiaryDto getDiaryByWriterId(Long id) {
+        // 다이어리 ID로 다이어리 엔티티를 조회
+        Diary diary = diaryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 일기를 찾을 수 없습니다: " + id));
+
+        // 엔티티를 DTO로 변환하여 반환
+        return diary.toDto();
+    }
+
 }

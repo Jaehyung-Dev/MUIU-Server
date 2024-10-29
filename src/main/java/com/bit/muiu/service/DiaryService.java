@@ -8,4 +8,6 @@ public interface DiaryService {
     DiaryDto writeDiary(DiaryDto diaryDto);
 
     List<DiaryDto> getDiariesByWriterId(Long memberId);
+
+    DiaryDto getDiaryByWriterId(Long id);
 }

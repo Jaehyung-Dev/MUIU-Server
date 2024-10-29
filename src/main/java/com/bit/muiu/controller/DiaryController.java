@@ -65,8 +65,8 @@ public class DiaryController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
-    @GetMapping("/my-diaries")
-    public ResponseEntity<?> getMyDiaries() {
+    @GetMapping("/user/{writerId}")
+    public ResponseEntity<?> getDiariesByWriterId(@PathVariable Long writerId) {
         ResponseDto<List<DiaryDto>> responseDto = new ResponseDto<>();
 
         try {
@@ -75,15 +75,18 @@ public class DiaryController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String username = userDetails.getUsername();
 
-            // 사용자 정보 가져오기
+            // 요청한 writerId가 현재 로그인된 사용자의 ID와 일치하는지 확인
             Member member = memberRepository.findByUsername(username)
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
 
-            Long memberId = member.getId();
-            log.info("Fetching diaries for member ID: {}", memberId);
+            if (!member.getId().equals(writerId)) {
+                throw new IllegalArgumentException("접근 권한이 없습니다.");
+            }
 
-            // 해당 유저의 다이어리 목록 조회
-            List<DiaryDto> diaries = diaryService.getDiariesByWriterId(memberId);
+            log.info("Fetching diaries for writer ID: {}", writerId);
+
+            // writerId를 기준으로 다이어리 목록 조회
+            List<DiaryDto> diaries = diaryService.getDiariesByWriterId(writerId);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setStatusMessage("일기 목록이 성공적으로 조회되었습니다.");
