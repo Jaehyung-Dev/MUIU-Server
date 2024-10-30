@@ -102,26 +102,13 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(member);
     }
 
+    @Override
     public void deleteUser(Long id) {
         Member member = memberRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("User not found")
         );
+        System.out.println(1234);
         memberRepository.delete(member);
-    }
-
-    @Override
-    public Member getMemberByToken(String token) {
-        // 1. JWT 토큰에서 사용자 이름을 추출 (JwtProvider 클래스를 통해 처리)
-        String username;
-        try {
-            username = jwtProvider.validateAndGetSubject(token);
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid JWT token");
-        }
-
-        // 2. 토큰에서 추출한 사용자 이름을 통해 데이터베이스에서 사용자 정보 조회
-        return memberRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with token"));
     }
 
     @Override
@@ -161,7 +148,12 @@ public class MemberServiceImpl implements MemberService {
     public void updateMemberStatus(Long memberId, String status) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        member.setStatus(status);
         memberRepository.save(member);
+    }
+
+    @Override
+    public Member findById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }

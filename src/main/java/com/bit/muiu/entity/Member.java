@@ -55,22 +55,6 @@ public class Member {
     @Column(nullable = true)
     private String profileImageUrl;
 
-    @Column(nullable = false)
-    private String status = "IDLE";
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Member member = (Member) o;
-        return Objects.equals(id, member.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
     public MemberDto toDto() {
         return MemberDto.builder()
                 .id(this.id)

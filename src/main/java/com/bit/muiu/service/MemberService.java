@@ -21,8 +21,6 @@ public interface MemberService {
 
     void deleteUser(Long id);
 
-    Member getMemberByToken(String token);
-
     boolean isEqual(String verifyNumber);
 
     MemberDto getNameById(Long id);
@@ -32,4 +30,6 @@ public interface MemberService {
     String getAddressById(Long id);
 
     void updateMemberStatus(Long memberId, String status);
+
+    Member findById(Long memberId);
 }

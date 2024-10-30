@@ -15,4 +15,6 @@ public interface FundService {
     void updateFundPost(Long postId, FundPostDto fundPostDto);
 
     String uploadImage(MultipartFile file);
+
+    void deleteFundPost(Long postId);
 }

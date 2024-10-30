@@ -1,3 +1,4 @@
+
 package com.bit.muiu.service.impl;
 
 import com.bit.muiu.common.FileUtils;
@@ -104,5 +105,14 @@ public class FundServiceImpl implements FundService {
         } catch (Exception e) {
             throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다.", e);
         }
+    }
+
+    @Override
+    public void deleteFundPost(Long postId) {
+        // 예외 처리를 포함하여 게시글 삭제 로직 수행
+        if (!fundPostRepository.existsById(postId)) {
+            throw new RuntimeException("게시글을 찾을 수 없습니다.");
+        }
+        fundPostRepository.deleteById(postId); // 게시글 삭제
     }
 }

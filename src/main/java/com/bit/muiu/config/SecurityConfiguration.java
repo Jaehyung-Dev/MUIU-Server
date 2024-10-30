@@ -57,7 +57,9 @@ public class SecurityConfiguration {
                             "/mind-column",
                             "/members/naver-callback",
                             "/chat/partner/**",
+                            "/diaries/user/**",
                             "/app/chat/**",
+                            "/chat/**",
                             "/my-websocket").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
