@@ -201,28 +201,6 @@ public class MemberController {
         }
     }
 
-    @GetMapping("/naveruser")
-    public ResponseEntity<Member> getNaverUserInfo(@RequestHeader("Authorization") String token) {
-        // Authorization 헤더에서 'Bearer ' 부분을 제거하고 토큰만 추출
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);  // 'Bearer ' 이후의 토큰만 추출
-        }
-
-        try {
-            // token을 사용해 사용자 정보를 가져오는 로직
-            Member member = memberService.getMemberByToken(token);  // 이 메서드가 토큰 검증 및 사용자 정보 반환
-
-            if (member == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            return ResponseEntity.ok(member);
-        } catch (Exception e) {
-            log.error("Error fetching user with token: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     @PostMapping("/counselNum/{verifyNumber}")
     public ResponseEntity<?> verifyNum(@PathVariable String verifyNumber) {
         try {
@@ -272,9 +250,6 @@ public class MemberController {
 
     @GetMapping("/naver-callback")
     public ResponseEntity<Object> NaverLogin(@RequestParam String code, @RequestParam String state) {
-        log.info("naver-callback code: {}", code);
-
-        // NaverServiceImpl의 processNaverLogin 메서드 호출
         return naverService.processNaverLogin(code, state);
     }
 }

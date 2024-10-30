@@ -17,8 +17,7 @@ import net.minidev.json.annotate.JsonIgnore;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChatRoom {
-
+public class CallRoom {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
