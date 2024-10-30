@@ -4,6 +4,7 @@ import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.dto.ResponseDto;
 import com.bit.muiu.entity.Member;
 import com.bit.muiu.service.MemberService;
+import com.bit.muiu.service.impl.NaverServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class MemberController {
     private final MemberService memberService;
-
+    private final NaverServiceImpl naverService;
     @PostMapping("/username-check")
     public ResponseEntity<?> usernameCheck(@RequestBody MemberDto memberDto) {
         ResponseDto<Map<String, String>> responseDto = new ResponseDto<>();
@@ -184,7 +185,6 @@ public class MemberController {
         }
     }
 
-
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         ResponseDto<String> responseDto = new ResponseDto<>();
@@ -198,28 +198,6 @@ public class MemberController {
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             responseDto.setStatusMessage(e.getMessage());
             return ResponseEntity.internalServerError().body(responseDto);
-        }
-    }
-
-    @GetMapping("/naveruser")
-    public ResponseEntity<Member> getNaverUserInfo(@RequestHeader("Authorization") String token) {
-        // Authorization 헤더에서 'Bearer ' 부분을 제거하고 토큰만 추출
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);  // 'Bearer ' 이후의 토큰만 추출
-        }
-
-        try {
-            // token을 사용해 사용자 정보를 가져오는 로직
-            Member member = memberService.getMemberByToken(token);  // 이 메서드가 토큰 검증 및 사용자 정보 반환
-
-            if (member == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            return ResponseEntity.ok(member);
-        } catch (Exception e) {
-            log.error("Error fetching user with token: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -268,5 +246,10 @@ public class MemberController {
             responseDto.setStatusMessage("Error updating address");
             return ResponseEntity.internalServerError().body(responseDto);
         }
+    }
+
+    @GetMapping("/naver-callback")
+    public ResponseEntity<Object> NaverLogin(@RequestParam String code, @RequestParam String state) {
+        return naverService.processNaverLogin(code, state);
     }
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @SequenceGenerator(
@@ -53,9 +54,6 @@ public class Member {
 
     @Column(nullable = true)
     private String profileImageUrl;
-
-    @Column(nullable = false)
-    private String status = "IDLE";
 
     public MemberDto toDto() {
         return MemberDto.builder()

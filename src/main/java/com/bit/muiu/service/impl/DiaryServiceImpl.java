@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,10 +45,29 @@ public class DiaryServiceImpl implements DiaryService {
         return savedDiary.toDto();
     }
 
+    @Override
     public List<DiaryDto> getDiariesByWriterId(Long writerId) {
         List<Diary> diaries = diaryRepository.findByMemberId(writerId);
         return diaries.stream()
                 .map(DiaryDto::fromEntity)  // Diary 엔티티를 DiaryDto로 변환
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public DiaryDto getDiaryByWriterId(Long id) {
+        // 다이어리 ID로 다이어리 엔티티를 조회
+        Diary diary = diaryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 일기를 찾을 수 없습니다: " + id));
+
+        // 엔티티를 DTO로 변환하여 반환
+        return diary.toDto();
+    }
+
+    @Override
+    public Optional<DiaryDto> getLatestDiaryByWriterId(Long writerId) {
+        // writerId에 따른 최신 일기 하나만 조회
+        return diaryRepository.findTopByMemberIdOrderByRegdateDesc(writerId)
+                .map(DiaryDto::fromEntity);
+    }
+
 }
