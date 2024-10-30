@@ -1,5 +1,6 @@
 package com.bit.muiu.service;
 
+import com.bit.muiu.dto.ChatPartnerDto;
 import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.entity.Member;
 
@@ -25,4 +26,12 @@ public interface MemberService {
     boolean isEqual(String verifyNumber);
 
     MemberDto getNameById(Long id);
+
+    void updateAddress(Long id, String address);
+
+    String getAddressById(Long id);
+
+    void updateMemberStatus(Long memberId, String status);
+
+    Member findById(Long memberId);
 }
