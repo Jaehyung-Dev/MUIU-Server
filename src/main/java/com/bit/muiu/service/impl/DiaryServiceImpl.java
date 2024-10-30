@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -70,4 +72,26 @@ public class DiaryServiceImpl implements DiaryService {
                 .map(DiaryDto::fromEntity);
     }
 
+    @Override
+    public boolean hasDiaryForToday(Long memberId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.plusDays(1).atStartOfDay();
+
+        return diaryRepository.existsByMemberIdAndRegdateBetween(memberId, startOfDay, endOfDay);
+    }
+
+    @Override
+    public boolean isDiaryOwner(Long diaryId, Long memberId) {
+        return diaryRepository.existsByDiaryIdAndMemberId(diaryId, memberId);
+    }
+
+    @Override
+    public void deleteDiary(Long diaryId) {
+        if (diaryRepository.existsById(diaryId)) {
+            diaryRepository.deleteById(diaryId);
+        } else {
+            throw new IllegalArgumentException("Diary not found");
+        }
+    }
 }

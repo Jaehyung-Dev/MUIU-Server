@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,5 +14,11 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     Optional<Diary> findTopByMemberIdOrderByRegdateDesc(@Param("writerId") Long writerId);
 
     List<Diary> findByMemberId(Long writerId);
+
+    boolean existsByMemberIdAndRegdateBetween(Long memberId, LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    @Query("SELECT COUNT(d) > 0 FROM Diary d WHERE d.diary_id = :diaryId AND d.member.id = :memberId")
+    boolean existsByDiaryIdAndMemberId(@Param("diaryId") Long diaryId, @Param("memberId") Long memberId);
+
 
 }

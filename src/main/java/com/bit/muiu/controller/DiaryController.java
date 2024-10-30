@@ -43,6 +43,13 @@ public class DiaryController {
             Long memberId = member.getId();  // Member의 id 값 가져오기
             log.info("Writing diary for member ID: {}", memberId); // 로그로 확인
 
+            // 오늘 일기 작성 여부 확인
+            if (diaryService.hasDiaryForToday(memberId)) {
+                responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+                responseDto.setStatusMessage("오늘 이미 작성한 일기가 있습니다.");
+                return ResponseEntity.badRequest().body(responseDto);
+            }
+
             // diaryDto에 memberId 대신 writerId 설정
             diaryDto.setWriter_id(memberId);  // writer_id와 매칭
 
@@ -113,6 +120,45 @@ public class DiaryController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<?> deleteDiary(@PathVariable Long diaryId) {
+        ResponseDto<Void> responseDto = new ResponseDto<>();
 
+        try {
+            // 현재 인증된 사용자 정보 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+
+            // username을 통해 Member 엔티티에서 id를 가져옴
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
+
+            // 해당 일기의 작성자가 현재 사용자와 일치하는지 확인
+            if (!diaryService.isDiaryOwner(diaryId, member.getId())) {
+                responseDto.setStatusCode(HttpStatus.FORBIDDEN.value());
+                responseDto.setStatusMessage("삭제 권한이 없습니다.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseDto);
+            }
+
+            // 일기 삭제 로직 호출
+            diaryService.deleteDiary(diaryId);
+
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Diary deleted successfully");
+
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            log.error("Error while deleting diary: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDto.setStatusMessage("Invalid user or data: " + e.getMessage());
+            return ResponseEntity.badRequest().body(responseDto);
+        } catch (Exception e) {
+            log.error("Error while deleting diary: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Internal server error: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 }
 
