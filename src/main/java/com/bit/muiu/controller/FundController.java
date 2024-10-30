@@ -27,7 +27,7 @@ public class FundController {
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
     public ResponseEntity<?> createFundPost(
             @RequestPart("fundPostDto") FundPostDto fundPostDto,
-            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart(value = "uploadFiles", required = false) MultipartFile[] uploadFiles,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         ResponseDto<FundPostDto> responseDto = new ResponseDto<>();
@@ -38,15 +38,19 @@ public class FundController {
                 throw new RuntimeException("사용자 인증 정보가 없습니다. 로그인 후 다시 시도해주세요.");
             }
 
-            // 세션에서 사용자 이름 가져오기
+            // 사용자 이름을 fundPostDto에 설정
             String loggedInUsername = userDetails.getUsername();
             log.info("loggedInUsername: {}", loggedInUsername);
             fundPostDto.setUsername(loggedInUsername);
 
-            // 파일이 있을 경우 파일 업로드 수행
-            if (file != null && !file.isEmpty()) {
-                // String imageUrl = fundService.uploadImage(file);
-                // fundPostDto.setMainImage(imageUrl); // 업로드한 이미지 URL을 DTO에 설정
+            // 파일이 있을 경우 파일 업로드 처리
+            if (uploadFiles != null) {
+                for (MultipartFile file : uploadFiles) {
+                    if (!file.isEmpty()) {
+                        String imageUrl = fundService.uploadImage(file);
+                        fundPostDto.setMainImage(imageUrl); // 파일 URL을 FundPostDto의 mainImage로 설정
+                    }
+                }
             }
 
             // DB에 저장
@@ -65,6 +69,7 @@ public class FundController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+
 
 
 
@@ -115,13 +120,28 @@ public class FundController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
-//        try {
-//            String imageUrl = fundService.uploadImage(file);  // 업로드한 이미지의 URL 받기
-//            return ResponseEntity.ok(imageUrl);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(500).body("이미지 업로드 실패");
-//        }
-        return null;
+        try {
+            String imageUrl = fundService.uploadImage(file);  // 업로드한 이미지의 URL 받기
+            return ResponseEntity.ok(imageUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("이미지 업로드 실패");
+        }
+    }
+
+    // 게시글 삭제
+    @DeleteMapping("/post/{postId}")
+    public ResponseEntity<?> deleteFundPost(@PathVariable Long postId, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            // 사용자 인증 확인
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
+            }
+
+            fundService.deleteFundPost(postId); // 게시글 삭제 서비스 호출
+            return ResponseEntity.ok("게시글이 성공적으로 삭제되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제 실패: " + e.getMessage());
+        }
     }
 
 
