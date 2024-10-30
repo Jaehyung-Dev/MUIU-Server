@@ -5,6 +5,7 @@ import com.bit.muiu.jwt.JwtProvider;
 import com.bit.muiu.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,12 @@ public class NaverServiceImpl{
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
 
+    @Value("${naver.clientId}")
+    private String clientId;
+
+    @Value("${naver.secretKey}")
+    private String secretKey;
+
     public ResponseEntity<Object> processNaverLogin(String code, String state) {
         // WebClient 설정
         WebClient webClient = WebClient.builder()
@@ -40,8 +47,8 @@ public class NaverServiceImpl{
                 .uri(uriBuilder -> uriBuilder
                         .path("/oauth2.0/token")
                         .queryParam("grant_type", "authorization_code")
-                        .queryParam("client_id", "5EoXACfzIjcnBB2VQtSy")  // Client ID
-                        .queryParam("client_secret", "PSbXX8cVee")         // Client Secret
+                        .queryParam("client_id", clientId)  // Client ID
+                        .queryParam("client_secret", secretKey)         // Client Secret
                         .queryParam("code", code)
                         .queryParam("state", state)
                         .build())
@@ -51,7 +58,6 @@ public class NaverServiceImpl{
 
         // Access Token 추출
         String accessToken = (String) tokenResponse.get("access_token");
-        log.info("naver-callback access token: {}", accessToken);
 
         // AccessToken으로 사용자 정보 조회
         WebClient naverApiWebClient = WebClient.builder()
@@ -70,9 +76,6 @@ public class NaverServiceImpl{
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
-
-        // 사용자 정보 로그 출력
-        log.info("Naver User Info Response: {}", infoResponse);
 
         // 사용자 정보에서 필요한 항목 추출
         Map<String, String> infoResponseMap = (Map<String, String>) infoResponse.get("response");
@@ -141,7 +144,6 @@ public class NaverServiceImpl{
         // JWT 토큰 생성
         String token = jwtProvider.createJwt(member);
 
-        // 사용자 정보를 Map에 저장하여 반환
         // 사용자 정보를 Map에 저장하여 반환
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("isLogin", true); // 항상 로그인 성공으로 처리
