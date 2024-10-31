@@ -94,4 +94,29 @@ public class DiaryServiceImpl implements DiaryService {
             throw new IllegalArgumentException("Diary not found");
         }
     }
+
+    @Override
+    public Optional<DiaryDto> getTodayDiary(Long memberId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.plusDays(1).atStartOfDay();
+
+        return diaryRepository.findByMemberIdAndRegdateBetween(memberId, startOfDay, endOfDay)
+                .map(DiaryDto::fromEntity); // Diary 엔티티를 DiaryDto로 변환하여 반환
+    }
+
+    @Override
+    public DiaryDto updateDiary(DiaryDto diaryDto) {
+        Diary existingDiary = diaryRepository.findById(diaryDto.getDiary_id()) // 수정된 부분
+                .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+
+        existingDiary.setTitle(diaryDto.getTitle());
+        existingDiary.setContent(diaryDto.getContent());
+        existingDiary.setMood(diaryDto.getMood());
+        existingDiary.setRegdate(LocalDateTime.now()); // regdate만 현재 시각으로 업데이트
+
+        Diary updatedDiary = diaryRepository.save(existingDiary); // 엔티티 저장
+        return DiaryDto.fromEntity(updatedDiary); // 저장된 엔티티를 DiaryDto로 변환하여 반환
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.bit.muiu.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,40 +17,62 @@ import java.util.Map;
 @RestController
 @RequestMapping("/ai-counseling")
 public class AIChatController {
-    private final String CLOVA_API_URL = "https://clovastudio.apigw.ntruss.com/testapp/v1/tasks/00vkmpow/completions";
-    private final String API_KEY = "JJt1bCYviC2webkzHJYo3VNLyTKIssg6q6gKZvcb";
+
+    @Value("${clova.host}")
+    private String host;
+
+    @Value("${clova.api_key}")
+    private String apiKey;
+
+    @Value("${clova.api_key_primary_val}")
+    private String apiKeyPrimaryVal;
+
+    @Value("${clova.request_id}")
+    private String requestId;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @PostMapping
-    public Map<String, String> chat(@RequestBody Map<String, String> request) {
-        String userMessage = request.get("message");
+    public String chat(@RequestBody Map<String, String> request) {
+        String text = request.get("text");
 
-        // 헤더 설정
+        // 기본값을 포함한 요청 데이터 구성
+        Map<String, Object> requestData = new HashMap<>();
+        requestData.put("text", text);
+        requestData.put("start", "");
+        requestData.put("restart", "");
+        requestData.put("includeTokens", false);
+        requestData.put("topP", 0.8);
+        requestData.put("topK", 4);
+        requestData.put("maxTokens", 300);
+        requestData.put("temperature", 0.85);
+        requestData.put("repeatPenalty", 5.0);
+        requestData.put("stopBefore", new String[]{"<|endoftext|>"});
+        requestData.put("includeAiFilters", true);
+        requestData.put("includeProbs", false);
+
+        String url = "https://" + host + "/testapp/v1/tasks/haygjo9s/completions";
+
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        headers.set("Authorization", "Bearer " + API_KEY);
+        headers.set("Content-Type", "application/json; charset=utf-8");
+        headers.set("X-NCP-CLOVASTUDIO-API-KEY", apiKey);
+        headers.set("X-NCP-APIGW-API-KEY", apiKeyPrimaryVal);
+        headers.set("X-NCP-CLOVASTUDIO-REQUEST-ID", requestId);
 
-        // 요청 본문 설정
-        Map<String, String> body = new HashMap<>();
-        body.put("query", userMessage);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestData, headers);
 
-        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+            Map<String, Object> responseBody = response.getBody();
 
-        // 클로바 API 호출
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> response = restTemplate.exchange(
-                CLOVA_API_URL,
-                HttpMethod.POST,
-                entity,
-                Map.class
-        );
-
-        // 클로바 응답 처리
-        Map<String, Object> responseBody = response.getBody();
-        String aiResponse = (String) responseBody.get("result"); // 응답 데이터 추출
-
-        // 프론트엔드로 응답 반환
-        Map<String, String> result = new HashMap<>();
-        result.put("reply", aiResponse);
-        return result;
+            if (responseBody != null && "20000".equals(((Map) responseBody.get("status")).get("code"))) {
+                return (String) ((Map) responseBody.get("result")).get("text");
+            } else {
+                return "Error";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error";
+        }
     }
 }
