@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChatRoomDto {
+public class VideoRoomDto {
     private Long id;
     private Long counselor;
     private Long client;
@@ -15,5 +15,4 @@ public class ChatRoomDto {
 
     private String counselorName;
     private String clientName;
-    private boolean isEnter;
 }

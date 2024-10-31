@@ -24,35 +24,17 @@ public class Counsel {
             strategy = GenerationType.SEQUENCE,
             generator = "counselSeqGenerator"
     )
+    private Long id;
+
+    @Column(nullable = false)
     private Long counselId;
 
     @Column(length = 20, nullable = false)
     private String type;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
-    private Date startTime;
+    private Long counselorId;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false)
-    private Date endTime;
-
-    @Column(nullable = false)
-    private Long counsellorId;
-
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long clientId;
-
-    public void assignMembers(Member counsellor, Member client) {
-        if (!"counsellor".equals(counsellor.getRole())) {
-            throw new IllegalArgumentException("The role of the counsellor must be 'counsellor'.");
-        }
-        if (!"user".equals(client.getRole())) {
-            throw new IllegalArgumentException("The role of the client must be 'user'.");
-        }
-
-        this.counsellorId = counsellor.getId();
-        this.clientId = client.getId();
-    }
-
 }

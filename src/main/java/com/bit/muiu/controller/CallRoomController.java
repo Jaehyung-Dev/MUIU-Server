@@ -1,10 +1,11 @@
 package com.bit.muiu.controller;
 
 import com.bit.muiu.dto.CallRoomDto;
-import com.bit.muiu.dto.ChatRoomDto;
+import com.bit.muiu.dto.MemberDto;
 import com.bit.muiu.entity.CallRoom;
 import com.bit.muiu.service.CallRoomService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
@@ -12,21 +13,27 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/call")
+@Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class CallRoomController {
-
     private final CallRoomService callRoomService;
 
-    // 새로운 통화 방 생성
     @PostMapping("/create")
-    public ChatRoomDto createCallRoom(@RequestParam Long counselorId) {
-        CallRoom callRoom = callRoomService.createCallRoom(counselorId);
+    public CallRoomDto createCallRoom(@RequestBody Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Member ID cannot be null");
+        }
+        CallRoom callRoom = callRoomService.createCallRoom(id);
         return callRoom.toDto();
     }
 
-    // 통화 방 상태 업데이트
-    @MessageMapping("/call/updateStatus")
-    @SendTo("/topic/call")
-    public ChatRoomDto updateStatus(CallRoomDto callRoomDto) {
-        return callRoomService.updateCallRoomStatus(callRoomDto);
+    @PostMapping("/enter")
+    public CallRoomDto enterCallRoom(@RequestBody Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Member ID cannot be null");
+        }
+        CallRoom callRoom = callRoomService.enterCallRoom(id);
+        return callRoom.toDto();
     }
+
 }
