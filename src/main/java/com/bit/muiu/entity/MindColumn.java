@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class MindColumn {
     private Long mc_id;
     private String mc_title;
     private Long mc_img_num;
+    private LocalDateTime regdate;
     @OneToMany(mappedBy = "mindColumn", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<MindColumnFile> mcfList;
@@ -38,9 +40,10 @@ public class MindColumn {
                 .mc_id(this.mc_id)
                 .mc_title(this.mc_title)
                 .mc_img_num(this.mc_img_num)
+                .regdate(this.regdate)
                 .mcfList(
                         mcfList != null && mcfList.size() > 0
-                            ?     mcfList.stream().map(MindColumnFile::toDto).toList()
+                                ?     mcfList.stream().map(MindColumnFile::toDto).toList()
                                 : new ArrayList<>()
                 )
                 .build();
