@@ -3,6 +3,7 @@ package com.bit.muiu.dto;
 import com.bit.muiu.entity.MindColumn;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class MindColumnDto {
     private Long mc_id;
     private String mc_title;
     private Long mc_img_num;
+    private LocalDateTime regdate;
     private List<MindColumnFileDto> mcfList;
 
     public MindColumn toEntity() {
@@ -23,6 +25,7 @@ public class MindColumnDto {
                 .mc_id(this.mc_id)
                 .mc_title(this.mc_title)
                 .mc_img_num(this.mc_img_num)
+                .regdate(this.regdate)
                 .mcfList(new ArrayList<>())
                 .build();
     }
