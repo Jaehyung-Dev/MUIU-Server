@@ -60,6 +60,7 @@ public class SecurityConfiguration {
                             "/diaries/user/**",
                             "/app/chat/**",
                             "/chat/**",
+                            "/call/**",
                             "/my-websocket").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
