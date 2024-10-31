@@ -13,6 +13,8 @@ public class ChatMessageDto {
     private String sender;
     private String content;
     private MessageType type;
+    private String counselorName;
+    private String clientName;
 
     public enum MessageType {
         CHAT,

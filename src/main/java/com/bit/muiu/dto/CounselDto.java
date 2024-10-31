@@ -13,20 +13,18 @@ import java.util.Date;
 @Builder
 @ToString
 public class CounselDto {
+    private Long id;
     private Long counselId;
     private String type;
-    private Date startTime;
-    private Date endTime;
-    private Long counsellorId;
+    private Long counselorId;
     private Long clientId;
 
-    public Counsel toEntity(Member counsellor, Member client) {
+    public Counsel toEntity(Member counselor, Member client) {
         return Counsel.builder()
+                .id(this.id)
                 .counselId(this.counselId)
                 .type(this.type)
-                .startTime(this.startTime)
-                .endTime(this.endTime)
-                .counsellorId(counsellor.getId())
+                .counselorId(counselor.getId())
                 .clientId(client.getId())
                 .build();
     }

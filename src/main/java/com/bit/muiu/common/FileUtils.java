@@ -109,4 +109,9 @@ public class FileUtils {
 
         s3.deleteObject(new DeleteObjectRequest(bucketName, directory + fileName));
     }
+
+    public String getFileUrl(String directory, String fileName) {
+        String bucketName = "bitcamp126";
+        return s3.getUrl(bucketName, directory + fileName).toString();
+    }
 }

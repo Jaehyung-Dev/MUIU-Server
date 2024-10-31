@@ -40,22 +40,6 @@ public class ChatService {
         memberRepository.save(member);
     }
 
-    @Transactional
-    public void updateStatusToIdle(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-
-        ChatRoom chatRoom = chatRoomRepository.findByClientIdOrCounselorId(memberId, memberId)
-                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
-
-        if (member.getRole().equals("ROLE_USER")) {
-            chatRoom.setStatus("WAITING");
-        }
-
-        chatRoomRepository.save(chatRoom);
-    }
-
-
 
 
 }

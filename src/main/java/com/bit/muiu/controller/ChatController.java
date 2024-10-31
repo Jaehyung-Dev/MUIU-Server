@@ -1,9 +1,6 @@
 package com.bit.muiu.controller;
 
-import com.bit.muiu.dto.ChatMessageDto;
-import com.bit.muiu.dto.ChatPartnerDto;
-import com.bit.muiu.dto.ChatRoomDto;
-import com.bit.muiu.dto.MemberDto;
+import com.bit.muiu.dto.*;
 import com.bit.muiu.entity.ChatRoom;
 import com.bit.muiu.entity.Member;
 import com.bit.muiu.service.ChatRoomService;
@@ -15,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -30,13 +28,8 @@ import java.util.Map;
 @Slf4j
 @CrossOrigin(origins = "http://localhost:3000")
 public class ChatController {
-    private final ChatService chatService;
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
-
-
-    @Autowired
-    private MemberService memberService;
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -52,7 +45,6 @@ public class ChatController {
 
     @PostMapping("/create")
     public ChatRoomDto createChatRoom(@RequestBody MemberDto member) {
-//        memberService.updateMemberStatus(memberId, "WAITING");
         ChatRoom chatRoom = chatRoomService.createChatRoom(member.getId());
         return chatRoom.toDto();
     }
@@ -60,17 +52,35 @@ public class ChatController {
     @PostMapping("/enter")
     public ChatRoomDto enterChatRoom(@RequestBody MemberDto member) {
             ChatRoom chatRoom = chatRoomService.enterChatRoom(member.getId());
-            return chatRoom.toDto();
-//        chatService.updateStatusToBusy(memberId);
+            ChatRoomDto chatRoomDto = chatRoom.toDto();
+            chatRoomDto.setEnter(true);
+            return chatRoomDto;
     }
 
-    @MessageMapping("/connect")
-    public void connectChat(@Payload Long memberId) {
-//        memberService.updateMemberStatus(memberId, "BUSY");
+    @MessageMapping("/chat.connect/{chatRoomId}")
+    @SendTo("/topic/{chatRoomId}/messages")
+    public ChatMessageDto connectChat(@DestinationVariable Long chatRoomId) {
+        log.info("connectChat: " + chatRoomId);
+        ChatMessageDto messageDto = new ChatMessageDto();
+        ChatRoomDto chatRoomDto = chatRoomService.findById(chatRoomId);
+
+        messageDto.setClientName(chatRoomDto.getClientName());
+        messageDto.setCounselorName(chatRoomDto.getCounselorName());
+        messageDto.setContent(chatRoomDto.getClientName() + "님이 입장하셨습니다.");
+        messageDto.setType(ChatMessageDto.MessageType.JOIN);
+        return messageDto;
     }
 
-    @MessageMapping("/exit")
-    public void exitChat(@Payload Long memberId) {
-        chatService.updateStatusToIdle(memberId);
+    @PostMapping("/exit/{chatRoomId}")
+    public ResponseEntity<Void> exitChatRoom(@PathVariable Long chatRoomId) {
+        chatRoomService.updateStatusToExit(chatRoomId);
+
+        ChatMessageDto leaveMessage = new ChatMessageDto();
+        leaveMessage.setContent("상대가 나갔습니다.");
+        leaveMessage.setType(ChatMessageDto.MessageType.LEAVE);
+
+        messagingTemplate.convertAndSend("/topic/" + chatRoomId + "/messages", leaveMessage);
+
+        return ResponseEntity.ok().build();
     }
 }
