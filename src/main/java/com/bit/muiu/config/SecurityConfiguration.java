@@ -55,6 +55,7 @@ public class SecurityConfiguration {
                             "/ai-counseling",   // 기능구현 완성할 때까지만 임시등록
                             "/members/counselNum/**",
                             "/mind-column",
+                            "/ai-counseling",
                             "/members/naver-callback",
                             "/chat/partner/**",
                             "/diaries/user/**",
