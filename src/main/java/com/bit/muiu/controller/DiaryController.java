@@ -246,5 +246,39 @@ public class DiaryController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchDiary(@RequestParam String query) {
+        ResponseDto<List<DiaryDto>> responseDto = new ResponseDto<>();
+
+        try {
+            // 현재 로그인된 사용자 정보 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+
+            // username을 통해 Member 엔티티에서 id를 가져옴
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
+
+            Long memberId = member.getId();
+
+            // 제목 또는 내용에 검색어가 포함된 일기 목록 조회
+            List<DiaryDto> diaries = diaryService.searchDiariesByQuery(memberId, query);
+            log.info("검색된 일기 목록: {}", diaries);
+
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("검색 결과 조회 성공");
+            responseDto.setItem(diaries);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error while searching diaries: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Internal server error: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+
 }
 

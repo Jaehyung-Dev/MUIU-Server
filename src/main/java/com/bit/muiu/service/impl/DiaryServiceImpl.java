@@ -119,4 +119,11 @@ public class DiaryServiceImpl implements DiaryService {
         return DiaryDto.fromEntity(updatedDiary); // 저장된 엔티티를 DiaryDto로 변환하여 반환
     }
 
+    @Override
+    public List<DiaryDto> searchDiariesByQuery(Long memberId, String query) {
+        List<Diary> diaries = diaryRepository.searchDiariesByQuery(memberId, query);
+        return diaries.stream()
+                .map(DiaryDto::fromEntity)
+                .collect(Collectors.toList());
+    }
 }

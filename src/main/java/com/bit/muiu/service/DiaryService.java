@@ -24,4 +24,6 @@ public interface DiaryService {
     Optional<DiaryDto> getTodayDiary(Long memberId);
 
     DiaryDto updateDiary(DiaryDto diaryDto);
+
+    List<DiaryDto> searchDiariesByQuery(Long memberId, String query);
 }

@@ -22,4 +22,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     boolean existsByDiaryIdAndMemberId(@Param("diaryId") Long diaryId, @Param("memberId") Long memberId);
 
     Optional<Diary> findByMemberIdAndRegdateBetween(Long memberId, LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    @Query(value = "SELECT * FROM diary WHERE writer_id = :memberId AND (title LIKE %:query% OR content LIKE %:query%)", nativeQuery = true)
+    List<Diary> searchDiariesByQuery(@Param("memberId") Long memberId, @Param("query") String query);
+
 }
