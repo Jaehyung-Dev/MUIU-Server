@@ -15,8 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/diaries")
@@ -246,5 +245,29 @@ public class DiaryController {
         }
     }
 
+    @GetMapping("/emotions/{writerId}")
+    public ResponseEntity<?> getEmotionData(@PathVariable Long writerId) {
+        ResponseDto<Map<String, List<Integer>>> responseDto = new ResponseDto<>();
+
+        try {
+            List<Integer> weeklyValues = diaryService.getEmotionDataByWriterId(writerId);
+            List<Integer> monthlyValues = diaryService.getEmotionDataByWriterId(writerId);  // 월간 데이터도 같은 메서드로 가져온다고 가정
+
+            Map<String, List<Integer>> emotionData = new HashMap<>();
+            emotionData.put("weeklyValues", weeklyValues);
+            emotionData.put("monthlyValues", monthlyValues);
+
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Emotion data fetched successfully");
+            responseDto.setItem(emotionData);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error while fetching emotion data: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Internal server error: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
 }
 

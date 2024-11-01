@@ -22,4 +22,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     boolean existsByDiaryIdAndMemberId(@Param("diaryId") Long diaryId, @Param("memberId") Long memberId);
 
     Optional<Diary> findByMemberIdAndRegdateBetween(Long memberId, LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+//    List<Diary> findByWriterId(Long writerId);
 }
