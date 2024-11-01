@@ -156,6 +156,7 @@ public class FundController {
     }
 
 
+    // 기부내역 insert
     @PostMapping("/payment")
     public ResponseEntity<?> savePaymentRecord(@RequestBody FundRecordDto fundRecordDto) {
         log.info("fundRecordDto 데이터 확인: {}", fundRecordDto);
@@ -167,6 +168,7 @@ public class FundController {
         }
     }
 
+    // 기부내역 조회
     @GetMapping("/records")
     public ResponseEntity<List<FundRecordDto>> getDonationRecords(@AuthenticationPrincipal UserDetails userDetails) {
         try {
@@ -185,6 +187,14 @@ public class FundController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    // 기부금액 합산
+    @PutMapping("/updateCurrentAmount/{postId}")
+    public ResponseEntity<Void> updateCurrentAmount(@PathVariable Long postId) {
+        fundService.updateCurrentAmountForPost(postId);
+        return ResponseEntity.ok().build();
+    }
+
 
 
 
