@@ -156,4 +156,11 @@ public class DiaryServiceImpl implements DiaryService {
                 return 0;
         }
     }
+    @Override
+    public List<DiaryDto> searchDiariesByQuery(Long memberId, String query) {
+        List<Diary> diaries = diaryRepository.searchDiariesByQuery(memberId, query);
+        return diaries.stream()
+                .map(DiaryDto::fromEntity)
+                .collect(Collectors.toList());
+    }
 }

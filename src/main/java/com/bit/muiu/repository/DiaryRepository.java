@@ -23,5 +23,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     Optional<Diary> findByMemberIdAndRegdateBetween(Long memberId, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
-//    List<Diary> findByWriterId(Long writerId);
+    @Query(value = "SELECT * FROM diary WHERE writer_id = :memberId AND (title LIKE %:query% OR content LIKE %:query%)", nativeQuery = true)
+    List<Diary> searchDiariesByQuery(@Param("memberId") Long memberId, @Param("query") String query);
+
 }

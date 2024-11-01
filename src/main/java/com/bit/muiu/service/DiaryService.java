@@ -27,4 +27,6 @@ public interface DiaryService {
 
     // writerId에 해당하는 감정 데이터 가져오기
     List<Integer> getEmotionDataByWriterId(Long writerId);
+
+    List<DiaryDto> searchDiariesByQuery(Long memberId, String query);
 }
