@@ -25,4 +25,6 @@ public interface FundService {
 
     @Transactional(readOnly = true)
     List<FundRecordDto> getDonationRecords(Long userId);
+
+    void updateCurrentAmountForPost(Long postId);
 }

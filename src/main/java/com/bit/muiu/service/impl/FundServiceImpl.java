@@ -143,6 +143,9 @@ public class FundServiceImpl implements FundService {
         fundRecord.setFundDate(fundRecordDto.getFundDate());
         fundRecord.setId(fundRecordDto.getId());
         fundRecordRepository.save(fundRecord);
+
+        // 기부 기록이 추가된 이후에 해당 기부 포스트의 currentAmount 업데이트
+        updateCurrentAmountForPost(fundRecord.getPostId());
     }
 
 
@@ -172,6 +175,17 @@ public class FundServiceImpl implements FundService {
         return fundRecordDtos;
     }
 
+    // 특정 postId에 대한 currentAmount 업데이트
+    @Transactional
+    public void updateCurrentAmountForPost(Long postId) {
+        Long totalAmount = fundRecordRepository.sumAmountByPostId(postId);
+
+        // 해당 postId를 가진 FundPost 엔티티의 currentAmount 컬럼 업데이트
+        FundPost fundPost = fundPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("FundPost not found"));
+        fundPost.setCurrentAmount(totalAmount != null ? totalAmount : 0);
+        fundPostRepository.save(fundPost);
+    }
 
 
 
