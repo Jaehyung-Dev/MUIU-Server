@@ -2,11 +2,16 @@ package com.bit.muiu.service.impl;
 
 import com.bit.muiu.common.FileUtils;
 import com.bit.muiu.dto.FundPostDto;
-import com.bit.muiu.dto.MindColumnFileDto;
+import com.bit.muiu.dto.FundRecordDto;
 import com.bit.muiu.entity.FundPost;
+import com.bit.muiu.entity.FundRecord;
+import com.bit.muiu.entity.Member;
 import com.bit.muiu.repository.FundPostRepository;
+import com.bit.muiu.repository.FundRecordRepository;
+import com.bit.muiu.repository.MemberRepository;
 import com.bit.muiu.service.FundService;
 import com.bit.muiu.service.NaverCloudStorageService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +30,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FundServiceImpl implements FundService {
     private final FundPostRepository fundPostRepository;
+    private final FundRecordRepository fundRecordRepository;
+    private final MemberRepository memberRepository;
     private final FileUtils fileUtils;
     private static final Logger log = LoggerFactory.getLogger(FundServiceImpl.class);
 
@@ -125,4 +133,51 @@ public class FundServiceImpl implements FundService {
         }
         fundPostRepository.deleteById(postId); // 게시글 삭제
     }
+
+    @Override
+    @Transactional
+    public void savePaymentRecord(FundRecordDto fundRecordDto) {
+        FundRecord fundRecord = new FundRecord();
+        fundRecord.setPostId(fundRecordDto.getPostId());
+        fundRecord.setAmount(fundRecordDto.getAmount());
+        fundRecord.setFundDate(fundRecordDto.getFundDate());
+        fundRecord.setId(fundRecordDto.getId());
+        fundRecordRepository.save(fundRecord);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FundRecordDto> getDonationRecords(Long userId) {
+        // userId를 사용하여 FundRecord 엔티티의 id 값과 일치하는 기록을 가져옴
+        List<FundRecord> fundRecords = fundRecordRepository.findAllById(userId);
+
+        List<FundRecordDto> fundRecordDtos = new ArrayList<>();
+        for (FundRecord record : fundRecords) {
+            Optional<FundPost> fundPostOpt = fundPostRepository.findById(record.getPostId());
+            String title = fundPostOpt.map(FundPost::getTitle).orElse("제목 없음");
+
+            Optional<Member> memberOpt = memberRepository.findById(record.getId());
+            String username = memberOpt.map(Member::getUsername).orElse("익명");
+
+            FundRecordDto dto = new FundRecordDto();
+            dto.setFundId(record.getFundId());
+            dto.setFundDate(record.getFundDate());
+            dto.setAmount(record.getAmount());
+            dto.setTitle(title);
+            dto.setUsername(username);
+
+            fundRecordDtos.add(dto);
+        }
+        return fundRecordDtos;
+    }
+
+
+
+
+
+
+
+
 }
+
