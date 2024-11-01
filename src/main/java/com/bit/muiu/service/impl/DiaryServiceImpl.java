@@ -107,13 +107,13 @@ public class DiaryServiceImpl implements DiaryService {
 
     @Override
     public DiaryDto updateDiary(DiaryDto diaryDto) {
-        Diary existingDiary = diaryRepository.findById(diaryDto.getDiary_id()) // 수정된 부분
+        Diary existingDiary = diaryRepository.findById(diaryDto.getDiary_id())
                 .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
 
         existingDiary.setTitle(diaryDto.getTitle());
         existingDiary.setContent(diaryDto.getContent());
         existingDiary.setMood(diaryDto.getMood());
-        existingDiary.setRegdate(LocalDateTime.now()); // regdate만 현재 시각으로 업데이트
+        existingDiary.setModdate(LocalDateTime.now()); // 수정일만 업데이트
 
         Diary updatedDiary = diaryRepository.save(existingDiary); // 엔티티 저장
         return DiaryDto.fromEntity(updatedDiary); // 저장된 엔티티를 DiaryDto로 변환하여 반환

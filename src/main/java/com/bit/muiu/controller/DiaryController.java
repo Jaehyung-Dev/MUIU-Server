@@ -170,5 +170,81 @@ public class DiaryController {
             return ResponseEntity.internalServerError().body(responseDto);
         }
     }
+    // 사용자의 모든 일기를 가져오는 메서드 추가
+    @GetMapping("/user")
+    public ResponseEntity<?> getDiariesByUser() {
+        ResponseDto<List<DiaryDto>> responseDto = new ResponseDto<>();
+
+        try {
+            // 현재 인증된 사용자 정보 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+
+            // username을 통해 Member 엔티티에서 id를 가져옴
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
+
+            Long memberId = member.getId();
+
+            // 사용자 일기 목록 조회
+            List<DiaryDto> diaries = diaryService.getDiariesByWriterId(memberId);
+
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("사용자의 모든 일기 조회 성공");
+            responseDto.setItem(diaries);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            log.error("Error while fetching user diaries: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Internal server error: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
+    @PutMapping("/{diaryId}")
+    public ResponseEntity<?> updateDiary(@PathVariable Long diaryId, @RequestBody DiaryDto diaryDto) {
+        ResponseDto<DiaryDto> responseDto = new ResponseDto<>();
+
+        try {
+            // 현재 인증된 사용자 정보 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+
+            // username을 통해 Member 엔티티에서 id를 가져옴
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username));
+
+            // 해당 일기의 작성자가 현재 사용자와 일치하는지 확인
+            if (!diaryService.isDiaryOwner(diaryId, member.getId())) {
+                responseDto.setStatusCode(HttpStatus.FORBIDDEN.value());
+                responseDto.setStatusMessage("수정 권한이 없습니다.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseDto);
+            }
+
+            // 일기 업데이트 로직 호출
+            diaryDto.setDiary_id(diaryId); // 기존 일기 ID 설정
+            DiaryDto updatedDiary = diaryService.updateDiary(diaryDto);
+
+            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDto.setStatusMessage("Diary updated successfully");
+            responseDto.setItem(updatedDiary);
+
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            log.error("Error while updating diary: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDto.setStatusMessage("Invalid user or data: " + e.getMessage());
+            return ResponseEntity.badRequest().body(responseDto);
+        } catch (Exception e) {
+            log.error("Error while updating diary: {}", e.getMessage());
+            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDto.setStatusMessage("Internal server error: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(responseDto);
+        }
+    }
+
 }
 
