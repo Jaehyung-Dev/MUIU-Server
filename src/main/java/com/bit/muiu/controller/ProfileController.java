@@ -37,6 +37,13 @@ public class ProfileController {
         Member member = memberRepository.findById(customUserDetails.getId())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         String profileImageUrl = member.getProfileImageUrl();
+
+        if (profileImageUrl == null || profileImageUrl.isEmpty()) {
+            // 프로필 이미지가 없는 경우 예외 처리
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "프로필 이미지가 설정되어 있지 않습니다."));
+        }
+
         return ResponseEntity.ok().body(Map.of("profileImageUrl", profileImageUrl));
     }
 

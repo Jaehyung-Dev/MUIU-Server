@@ -20,4 +20,8 @@ public interface DiaryService {
     boolean isDiaryOwner(Long diaryId, Long memberId);
 
     void deleteDiary(Long diaryId);
+
+    Optional<DiaryDto> getTodayDiary(Long memberId);
+
+    DiaryDto updateDiary(DiaryDto diaryDto);
 }
