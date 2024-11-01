@@ -32,7 +32,9 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> {
+
+                })
 //                .cors(httpSecurityCorsConfigurer -> {})
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(httpSecurityHttpBasicConfigurer -> {
@@ -60,7 +62,7 @@ public class SecurityConfiguration {
                             "/diaries/user/**",
                             "/app/chat/**",
                             "/chat/**",
-                            "/call/**",
+                            "/api/call/**",
                             "/my-websocket").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
@@ -68,19 +70,19 @@ public class SecurityConfiguration {
                 .build();
     }
 
-    // **CORS 설정 추가**
-    // 지피티가 넣어보라고 해서 일단 해봄
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // 1시간 캐시
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+//    // **CORS 설정 추가**
+//    // 지피티가 넣어보라고 해서 일단 해봄
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
+//        configuration.setAllowedHeaders(Arrays.asList("*"));
+//        configuration.setAllowCredentials(true);
+//        configuration.setMaxAge(3600L); // 1시간 캐시
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 }
