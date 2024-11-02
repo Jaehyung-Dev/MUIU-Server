@@ -38,6 +38,12 @@ public class FundRecord {
     @Temporal(TemporalType.DATE)
     private Date fundDate; // 기부 날짜
 
+    @Column(length = 300)
+    private String message; // 기부 메시지
+
+    @Column(length = 20)
+    private String fundName; // 기부 이름
+
     public FundRecordDto toDto() {
         return FundRecordDto.builder()
                 .fundId(this.fundId)
@@ -45,6 +51,8 @@ public class FundRecord {
                 .postId(this.postId)
                 .amount(this.amount)
                 .fundDate(this.fundDate)
+                .message(this.message)
+                .fundName(this.fundName)
                 .build();
     }
 }

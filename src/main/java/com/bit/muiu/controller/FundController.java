@@ -22,7 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3000") // 프론트엔드 도메인 허용
+@CrossOrigin(origins = "https://www.%EB%A7%88%EC%9D%8C%EC%9D%B4%EC%9D%8C.site") // 프론트엔드 도메인 허용
 @RestController
 @RequestMapping("/api/fund")
 @RequiredArgsConstructor
@@ -194,10 +194,6 @@ public class FundController {
         fundService.updateCurrentAmountForPost(postId);
         return ResponseEntity.ok().build();
     }
-
-
-
-
 
 
 

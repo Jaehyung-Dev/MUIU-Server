@@ -142,6 +142,9 @@ public class FundServiceImpl implements FundService {
         fundRecord.setAmount(fundRecordDto.getAmount());
         fundRecord.setFundDate(fundRecordDto.getFundDate());
         fundRecord.setId(fundRecordDto.getId());
+        fundRecord.setMessage(fundRecordDto.getMessage());
+        fundRecord.setFundName(fundRecordDto.getFundName());
+
         fundRecordRepository.save(fundRecord);
 
         // 기부 기록이 추가된 이후에 해당 기부 포스트의 currentAmount 업데이트
@@ -169,6 +172,8 @@ public class FundServiceImpl implements FundService {
             dto.setAmount(record.getAmount());
             dto.setTitle(title);
             dto.setUsername(username);
+            dto.setFundName(record.getFundName());
+            dto.setMessage(record.getMessage());
 
             fundRecordDtos.add(dto);
         }
