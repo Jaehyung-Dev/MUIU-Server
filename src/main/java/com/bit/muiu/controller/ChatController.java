@@ -26,7 +26,7 @@ import java.util.Map;
 @RequestMapping("/chat")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "https://www.마음이음.site")
+@CrossOrigin(origins = "https://www.%EB%A7%88%EC%9D%8C%EC%9D%B4%EC%9D%8C.site")
 public class ChatController {
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
