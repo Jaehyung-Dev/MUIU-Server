@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_CREDENTIAL_ID = 'dockerhub-credentials'  // Jenkins에서 등록한 자격 증명 ID
-        DOCKER_IMAGE = 'your-dockerhub-username/muiu-backend'  // Docker Hub 이미지 이름
+        DOCKER_IMAGE = 'soojeongmin/muiu-back'  // Docker Hub 이미지 이름
         DOCKER_TAG = 'latest'  // 이미지 태그
     }
     stages {
