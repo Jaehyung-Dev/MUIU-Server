@@ -15,6 +15,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,8 +123,7 @@ public class DiaryServiceImpl implements DiaryService {
     }
 
     @Override
-    public List<Integer> getEmotionDataByWriterId(Long writerId) {
-
+    public List<Integer> getWeekEmotionDataByWriterId(Long writerId) {
         // 현재 날짜를 기준으로 이번 주 월요일부터 오늘까지 범위 설정
         LocalDate today = LocalDate.now();
         LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -133,12 +133,66 @@ public class DiaryServiceImpl implements DiaryService {
         LocalDateTime endOfTodayTime = endOfDay.atStartOfDay();
 
         List<Diary> weeklyDiaries = diaryRepository.findByMemberId(writerId);
-        return weeklyDiaries.stream()
-                .filter(diary ->
-                        diary.getRegdate().isAfter(startOfWeekTime) && diary.getRegdate().isBefore(endOfTodayTime))
-                .map(diary -> moodToValue(diary.getMood())) // 감정 상태를 숫자로 변환
+
+        // 요일별 감정 데이터 초기화 (월 ~ 오늘까지)
+        List<Integer> emotionData = startOfWeek.datesUntil(today.plusDays(1))
+                .map(date -> {
+                    Optional<Diary> diaryForDate = weeklyDiaries.stream()
+                            .filter(diary -> diary.getRegdate().toLocalDate().equals(date)) // 특정 날짜의 일기 필터링
+                            .findFirst();
+                    return diaryForDate.map(diary -> moodToValue(diary.getMood())) // 일기 감정 변환
+                            .orElse(0); // 일기 없는 날은 0으로 설정
+                })
                 .collect(Collectors.toList());
+
+        return emotionData;
+    }
+
+    @Override
+    public List<Integer> getMonthEmotionDataByWriterId(Long writerId) {
+        LocalDate today = LocalDate.now().minusMonths(1).withDayOfMonth(28); // 테스트를 위해 지난달 설정
+        LocalDate startOfMonth = today.withDayOfMonth(1); // 이번 달의 첫날
+
+        // 이번 달의 일기 데이터를 가져옴
+        List<Diary> monthlyDiaries = diaryRepository.findByMemberId(writerId);
+
+        // 주별 평균 감정 데이터를 담을 리스트
+        List<Integer> weeklyAverages = new ArrayList<>();
+
+        // 이번 달의 각 주를 반복
+        LocalDate weekStart = startOfMonth;
+        while (weekStart.isBefore(today.plusDays(1))) {
+            // 람다 내에서 사용할 effectively final 변수를 새로 정의
+            LocalDate currentWeekStart = weekStart;
+            LocalDate weekEnd = weekStart.plusDays(6);
+            LocalDate currentWeekEnd = weekEnd;
+
+            // 해당 주차에 속하는 일기 데이터를 필터링
+            List<Integer> weekData = monthlyDiaries.stream()
+                    .filter(diary -> {
+                        LocalDate diaryDate = diary.getRegdate().toLocalDate();
+                        return (diaryDate.isEqual(currentWeekStart) || diaryDate.isAfter(currentWeekStart)) &&
+                                (diaryDate.isEqual(currentWeekEnd) || diaryDate.isBefore(currentWeekEnd));
+                    })
+                    .map(diary -> moodToValue(diary.getMood())) // 감정 값을 숫자로 변환
+                    .collect(Collectors.toList());
+
+            // 해당 주의 평균 감정 값을 계산
+            if (!weekData.isEmpty()) {
+                int weeklySum = weekData.stream().mapToInt(Integer::intValue).sum();
+                int weeklyAverage = Math.round((float) weeklySum / weekData.size()); // 반올림하여 정수로 변환
+                weeklyAverages.add(weeklyAverage);
+            } else {
+                weeklyAverages.add(0); // 데이터가 없는 주는 0으로 설정
+            }
+
+            // 다음 주차로 이동
+            weekStart = weekStart.plusDays(7);
         }
+
+        return weeklyAverages;
+    }
+
 
     private int moodToValue(String mood) {
         switch (mood) {

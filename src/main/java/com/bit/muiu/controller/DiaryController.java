@@ -250,8 +250,8 @@ public class DiaryController {
         ResponseDto<Map<String, List<Integer>>> responseDto = new ResponseDto<>();
 
         try {
-            List<Integer> weeklyValues = diaryService.getEmotionDataByWriterId(writerId);
-            List<Integer> monthlyValues = diaryService.getEmotionDataByWriterId(writerId);  // 월간 데이터도 같은 메서드로 가져온다고 가정
+            List<Integer> weeklyValues = diaryService.getWeekEmotionDataByWriterId(writerId);
+            List<Integer> monthlyValues = diaryService.getMonthEmotionDataByWriterId(writerId);
 
             Map<String, List<Integer>> emotionData = new HashMap<>();
             emotionData.put("weeklyValues", weeklyValues);
