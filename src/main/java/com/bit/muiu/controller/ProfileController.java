@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "https://www.xn--hz2b60wa3n.site", allowCredentials = "true")
+@CrossOrigin(origins = "https://www.마음이음.site", allowCredentials = "true")
 @RequestMapping("/apis/profile")
 public class ProfileController {
 
