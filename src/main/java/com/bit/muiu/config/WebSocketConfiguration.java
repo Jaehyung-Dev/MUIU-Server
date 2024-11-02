@@ -14,6 +14,7 @@ public class WebSocketConfiguration implements WebSocketConfigurer, WebSocketMes
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new CustomAudioWebSocketHandler(), "/audio")
+//                .setAllowedOrigins("https://www.마음이음.site")
                 .setAllowedOriginPatterns("*")
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
     }
@@ -27,13 +28,14 @@ public class WebSocketConfiguration implements WebSocketConfigurer, WebSocketMes
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
+//                .setAllowedOrigins("https://www.마음이음.site")
+//                .withSockJS();
                 .setAllowedOriginPatterns("*");
         registry.addEndpoint("/ws/audio")
                 .setAllowedOriginPatterns("*");
         registry.addEndpoint("/ws-signaling")
                 .setAllowedOriginPatterns("*");
     }
-
 
     class CustomAudioWebSocketHandler extends TextWebSocketHandler {
     }
