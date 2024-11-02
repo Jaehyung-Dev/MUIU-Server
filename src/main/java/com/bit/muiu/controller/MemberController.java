@@ -252,4 +252,5 @@ public class MemberController {
     public ResponseEntity<Object> NaverLogin(@RequestParam String code, @RequestParam String state) {
         return naverService.processNaverLogin(code, state);
     }
+
 }

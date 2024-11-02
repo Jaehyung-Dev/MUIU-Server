@@ -32,8 +32,9 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-//                .cors(httpSecurityCorsConfigurer -> {})
+                .cors(cors -> {
+
+                })
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(httpSecurityHttpBasicConfigurer -> {
                     httpSecurityHttpBasicConfigurer.disable();
@@ -58,6 +59,7 @@ public class SecurityConfiguration {
                             "/diaries/user/**",
                             "/app/chat/**",
                             "/chat/**",
+                            "/api/call/**",
                             "/call/**",
                             "/my-websocket",
                             "/mind-column").permitAll();
@@ -65,21 +67,5 @@ public class SecurityConfiguration {
                 })
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
-    }
-
-    // **CORS 설정 추가**
-    // 지피티가 넣어보라고 해서 일단 해봄
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://www.마음이음.site"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // 1시간 캐시
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }

@@ -1,7 +1,10 @@
 package com.bit.muiu.controller;
 
 import com.bit.muiu.dto.FundPostDto;
+import com.bit.muiu.dto.FundRecordDto;
 import com.bit.muiu.dto.ResponseDto;
+import com.bit.muiu.entity.Member;
+import com.bit.muiu.repository.MemberRepository;
 import com.bit.muiu.service.FundService;
 import com.bit.muiu.service.NaverCloudStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,9 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.bit.muiu.common.FileUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -25,6 +30,7 @@ import java.util.List;
 public class FundController {
 
     private final FundService fundService;
+    private final MemberRepository memberRepository;
     private final NaverCloudStorageService naverCloudStorageService;
     private final FileUtils fileUtils;
 
@@ -148,6 +154,51 @@ public class FundController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제 실패: " + e.getMessage());
         }
     }
+
+
+    // 기부내역 insert
+    @PostMapping("/payment")
+    public ResponseEntity<?> savePaymentRecord(@RequestBody FundRecordDto fundRecordDto) {
+        log.info("fundRecordDto 데이터 확인: {}", fundRecordDto);
+        try {
+            fundService.savePaymentRecord(fundRecordDto);
+            return ResponseEntity.ok("결제 내역이 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 내역 저장 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    // 기부내역 조회
+    @GetMapping("/records")
+    public ResponseEntity<List<FundRecordDto>> getDonationRecords(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            // 인증된 사용자의 username 가져옴
+            String username = userDetails.getUsername();
+
+            // username으로 Member 찾기
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            Long userId = member.getId();
+
+            // 기부 기록 조회
+            List<FundRecordDto> records = fundService.getDonationRecords(userId);
+            return ResponseEntity.ok(records);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // 기부금액 합산
+    @PutMapping("/updateCurrentAmount/{postId}")
+    public ResponseEntity<Void> updateCurrentAmount(@PathVariable Long postId) {
+        fundService.updateCurrentAmountForPost(postId);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+
 
 
 }
