@@ -1,9 +1,12 @@
-
 package com.bit.muiu.controller;
 
 import com.bit.muiu.dto.FundPostDto;
+import com.bit.muiu.dto.FundRecordDto;
 import com.bit.muiu.dto.ResponseDto;
+import com.bit.muiu.entity.Member;
+import com.bit.muiu.repository.MemberRepository;
 import com.bit.muiu.service.FundService;
+import com.bit.muiu.service.NaverCloudStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.bit.muiu.common.FileUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -24,6 +30,9 @@ import java.util.List;
 public class FundController {
 
     private final FundService fundService;
+    private final MemberRepository memberRepository;
+    private final NaverCloudStorageService naverCloudStorageService;
+    private final FileUtils fileUtils;
 
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
     public ResponseEntity<?> createFundPost(
@@ -34,30 +43,27 @@ public class FundController {
         ResponseDto<FundPostDto> responseDto = new ResponseDto<>();
 
         try {
-            // 인증 정보 확인 및 사용자 이름 설정
+            log.info("Controller: post fundPostDto: {}", fundPostDto);
+            log.info("Controller: post uploadFiles: {}", uploadFiles);
             if (userDetails == null) {
                 throw new RuntimeException("사용자 인증 정보가 없습니다. 로그인 후 다시 시도해주세요.");
             }
 
-            // 사용자 이름을 fundPostDto에 설정
             String loggedInUsername = userDetails.getUsername();
-            log.info("loggedInUsername: {}", loggedInUsername);
             fundPostDto.setUsername(loggedInUsername);
 
-            // 파일이 있을 경우 파일 업로드 처리
+            // 이미지 파일 업로드 및 URL 설정
             if (uploadFiles != null) {
                 for (MultipartFile file : uploadFiles) {
                     if (!file.isEmpty()) {
-                        String imageUrl = fundService.uploadImage(file);
-                        fundPostDto.setMainImage(imageUrl); // 파일 URL을 FundPostDto의 mainImage로 설정
+                        String imageUrl = fundService.uploadImage(file);  // 새 메서드 사용
+                        fundPostDto.setMainImage(imageUrl);  // 이미지 URL을 설정
                     }
                 }
             }
 
-            // DB에 저장
+            // 최종적으로 DB에 저장
             FundPostDto savedFundPost = fundService.createFundPost(fundPostDto);
-
-            // 성공 응답
             responseDto.setStatusCode(HttpStatus.CREATED.value());
             responseDto.setStatusMessage("Fund post created successfully");
             responseDto.setItem(savedFundPost);
@@ -73,12 +79,25 @@ public class FundController {
 
 
 
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            log.info("여기 컨트롤러. post file: {}", file);
+            String imageUrl = fundService.uploadImage(file);  // 업로드한 이미지의 URL 받기
+            return ResponseEntity.ok(imageUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("이미지 업로드 실패");
+        }
+    }
+
+
 
 
     @GetMapping("/posts")
     public ResponseEntity<List<FundPostDto>> getAllPosts() {
         try {
             List<FundPostDto> posts = fundService.getAllPosts();
+            log.info("1번 로직, 션의 posts 데이터 확인: {}", posts);
             return ResponseEntity.ok(posts);
         } catch (Exception e) {
             log.error("Error retrieving fund posts: {}", e.getMessage());
@@ -119,15 +138,6 @@ public class FundController {
         }
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
-        try {
-            String imageUrl = fundService.uploadImage(file);  // 업로드한 이미지의 URL 받기
-            return ResponseEntity.ok(imageUrl);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("이미지 업로드 실패");
-        }
-    }
 
     // 게시글 삭제
     @DeleteMapping("/post/{postId}")
@@ -144,6 +154,51 @@ public class FundController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제 실패: " + e.getMessage());
         }
     }
+
+
+    // 기부내역 insert
+    @PostMapping("/payment")
+    public ResponseEntity<?> savePaymentRecord(@RequestBody FundRecordDto fundRecordDto) {
+        log.info("fundRecordDto 데이터 확인: {}", fundRecordDto);
+        try {
+            fundService.savePaymentRecord(fundRecordDto);
+            return ResponseEntity.ok("결제 내역이 성공적으로 저장되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 내역 저장 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    // 기부내역 조회
+    @GetMapping("/records")
+    public ResponseEntity<List<FundRecordDto>> getDonationRecords(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            // 인증된 사용자의 username 가져옴
+            String username = userDetails.getUsername();
+
+            // username으로 Member 찾기
+            Member member = memberRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            Long userId = member.getId();
+
+            // 기부 기록 조회
+            List<FundRecordDto> records = fundService.getDonationRecords(userId);
+            return ResponseEntity.ok(records);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // 기부금액 합산
+    @PutMapping("/updateCurrentAmount/{postId}")
+    public ResponseEntity<Void> updateCurrentAmount(@PathVariable Long postId) {
+        fundService.updateCurrentAmountForPost(postId);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+
 
 
 }

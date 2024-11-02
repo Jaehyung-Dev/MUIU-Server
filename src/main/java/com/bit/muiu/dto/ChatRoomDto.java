@@ -15,4 +15,5 @@ public class ChatRoomDto {
 
     private String counselorName;
     private String clientName;
+    private boolean isEnter;
 }

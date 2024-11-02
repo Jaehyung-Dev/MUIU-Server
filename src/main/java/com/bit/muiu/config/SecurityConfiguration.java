@@ -32,8 +32,9 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-//                .cors(httpSecurityCorsConfigurer -> {})
+                .cors(cors -> {
+
+                })
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(httpSecurityHttpBasicConfigurer -> {
                     httpSecurityHttpBasicConfigurer.disable();
@@ -52,34 +53,19 @@ public class SecurityConfiguration {
                             "/sms/send/**",
                             "/ws/**", // WebSocket 경로 추가
                             "/topic/**", // STOMP 토픽 경로 추가
-                            "/ai-counseling",   // 기능구현 완성할 때까지만 임시등록
                             "/members/counselNum/**",
-                            "/mind-column",
                             "/members/naver-callback",
                             "/chat/partner/**",
                             "/diaries/user/**",
                             "/app/chat/**",
                             "/chat/**",
-                            "/my-websocket").permitAll();
+                            "/api/call/**",
+                            "/call/**",
+                            "/my-websocket",
+                            "/mind-column").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
-    }
-
-    // **CORS 설정 추가**
-    // 지피티가 넣어보라고 해서 일단 해봄
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // 1시간 캐시
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CallRoomDto {
+public class VideoRoomDto {
     private Long id;
     private Long counselor;
     private Long client;

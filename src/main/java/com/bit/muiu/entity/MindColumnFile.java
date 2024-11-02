@@ -32,11 +32,10 @@ public class MindColumnFile {
 
     private String mcf_name;
     private String mcf_originname;
+    private int order_index;
     private String mcf_path;
     @Transient
-    private String mcf_status;
-    @Transient
-    private String newfilename;
+    private Boolean isNew;
 
     public MindColumnFileDto toDto() {
         return MindColumnFileDto.builder()
@@ -44,9 +43,9 @@ public class MindColumnFile {
                 .mc_id(this.mindColumn.getMc_id())
                 .mcf_name(this.mcf_name)
                 .mcf_originname(this.mcf_originname)
+                .order_index(this.order_index)
                 .mcf_path(this.mcf_path)
-                .mcf_status(this.mcf_status)
-                .newfilename(this.newfilename)
+                .isNew(this.isNew)
                 .build();
     }
 }

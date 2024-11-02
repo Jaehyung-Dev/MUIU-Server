@@ -1,12 +1,17 @@
-
 package com.bit.muiu.service.impl;
 
 import com.bit.muiu.common.FileUtils;
 import com.bit.muiu.dto.FundPostDto;
+import com.bit.muiu.dto.FundRecordDto;
 import com.bit.muiu.entity.FundPost;
+import com.bit.muiu.entity.FundRecord;
+import com.bit.muiu.entity.Member;
 import com.bit.muiu.repository.FundPostRepository;
+import com.bit.muiu.repository.FundRecordRepository;
+import com.bit.muiu.repository.MemberRepository;
 import com.bit.muiu.service.FundService;
 import com.bit.muiu.service.NaverCloudStorageService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +30,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FundServiceImpl implements FundService {
     private final FundPostRepository fundPostRepository;
+    private final FundRecordRepository fundRecordRepository;
+    private final MemberRepository memberRepository;
     private final FileUtils fileUtils;
     private static final Logger log = LoggerFactory.getLogger(FundServiceImpl.class);
 
@@ -32,21 +41,17 @@ public class FundServiceImpl implements FundService {
     @Override
     public FundPostDto createFundPost(FundPostDto fundPostDto) {
         try {
-            // 로그 추가
             log.info("DTO 데이터 확인: {}", fundPostDto);
 
-            // DTO를 엔티티로 변환
             FundPost fundPost = fundPostDto.toEntity();
-            fundPost.setUsername(fundPostDto.getUsername()); // 사용자 이름 설정
+            fundPost.setUsername(fundPostDto.getUsername());
 
-            // mainImage 필드를 엔티티에 설정
             if (fundPostDto.getMainImage() != null) {
                 fundPost.setMainImage(fundPostDto.getMainImage());
             }
 
-            // DB에 저장
             FundPost savedFundPost = fundPostRepository.save(fundPost);
-            return savedFundPost.toDto(); // 저장된 엔티티를 다시 DTO로 변환하여 반환
+            return savedFundPost.toDto();
         } catch (Exception e) {
             throw new RuntimeException("Failed to create fund post", e);
         }
@@ -55,11 +60,21 @@ public class FundServiceImpl implements FundService {
 
     @Override
     public List<FundPostDto> getAllPosts() {
-        return fundPostRepository.findAll()
-                .stream()
-                .map(FundPost::toDto)
+        return fundPostRepository.findAll().stream()
+                .map(fundPost -> {
+                    FundPostDto dto = new FundPostDto(fundPost);
+                    if (dto.getMainImage() != null && !dto.getMainImage().isEmpty()) {
+                        // mainImage에 이미 URL이 포함되어 있는지 확인하여 중복 방지
+                        if (!dto.getMainImage().startsWith("http")) {
+                            String imageUrl = fileUtils.getFileUrl("fund-images/", dto.getMainImage());
+                            dto.setMainImage(imageUrl);
+                        }
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public FundPostDto getPostById(Long id) {
@@ -98,14 +113,17 @@ public class FundServiceImpl implements FundService {
     public String uploadImage(MultipartFile file) {
         try {
             // 고유한 파일 이름 생성
-            String uniqueFileName = "fund-images/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String fileName = "fund-images/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
-            // 네이버 클라우드에 이미지 업로드하고 URL 반환
-            return naverCloudStorageService.uploadFile(file, uniqueFileName);
-        } catch (Exception e) {
+            // NaverCloudStorageService를 이용해 이미지 업로드 및 URL 반환
+            return naverCloudStorageService.uploadFile(file, fileName);
+        } catch (IOException e) {
             throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다.", e);
         }
     }
+
+
+
 
     @Override
     public void deleteFundPost(Long postId) {
@@ -115,4 +133,65 @@ public class FundServiceImpl implements FundService {
         }
         fundPostRepository.deleteById(postId); // 게시글 삭제
     }
+
+    @Override
+    @Transactional
+    public void savePaymentRecord(FundRecordDto fundRecordDto) {
+        FundRecord fundRecord = new FundRecord();
+        fundRecord.setPostId(fundRecordDto.getPostId());
+        fundRecord.setAmount(fundRecordDto.getAmount());
+        fundRecord.setFundDate(fundRecordDto.getFundDate());
+        fundRecord.setId(fundRecordDto.getId());
+        fundRecordRepository.save(fundRecord);
+
+        // 기부 기록이 추가된 이후에 해당 기부 포스트의 currentAmount 업데이트
+        updateCurrentAmountForPost(fundRecord.getPostId());
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FundRecordDto> getDonationRecords(Long userId) {
+        // userId를 사용하여 FundRecord 엔티티의 id 값과 일치하는 기록을 가져옴
+        List<FundRecord> fundRecords = fundRecordRepository.findAllById(userId);
+
+        List<FundRecordDto> fundRecordDtos = new ArrayList<>();
+        for (FundRecord record : fundRecords) {
+            Optional<FundPost> fundPostOpt = fundPostRepository.findById(record.getPostId());
+            String title = fundPostOpt.map(FundPost::getTitle).orElse("제목 없음");
+
+            Optional<Member> memberOpt = memberRepository.findById(record.getId());
+            String username = memberOpt.map(Member::getUsername).orElse("익명");
+
+            FundRecordDto dto = new FundRecordDto();
+            dto.setFundId(record.getFundId());
+            dto.setFundDate(record.getFundDate());
+            dto.setAmount(record.getAmount());
+            dto.setTitle(title);
+            dto.setUsername(username);
+
+            fundRecordDtos.add(dto);
+        }
+        return fundRecordDtos;
+    }
+
+    // 특정 postId에 대한 currentAmount 업데이트
+    @Transactional
+    public void updateCurrentAmountForPost(Long postId) {
+        Long totalAmount = fundRecordRepository.sumAmountByPostId(postId);
+
+        // 해당 postId를 가진 FundPost 엔티티의 currentAmount 컬럼 업데이트
+        FundPost fundPost = fundPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("FundPost not found"));
+        fundPost.setCurrentAmount(totalAmount != null ? totalAmount : 0);
+        fundPostRepository.save(fundPost);
+    }
+
+
+
+
+
+
+
 }
+

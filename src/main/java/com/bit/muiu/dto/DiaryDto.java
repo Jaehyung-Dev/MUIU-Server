@@ -33,19 +33,16 @@ public class DiaryDto {
                 .moddate(diary.getModdate())
                 .build();
     }
-
     // DiaryDto를 Diary 엔티티로 변환하는 메서드
     public Diary toEntity(Member member) {
-        Diary diary = new Diary();
-        diary.setTitle(this.title);
-        diary.setContent(this.content);
-        diary.setMember(member); // Member 설정
-
         return Diary.builder()
-                .member(member)
+                .diary_id(this.diary_id)       // 기존 ID가 있을 경우 설정
+                .member(member)                // Member 설정
                 .mood(this.mood)
                 .title(this.title)
                 .content(this.content)
+                .regdate(this.regdate)         // 등록일 설정
+                .moddate(this.moddate)         // 수정일 설정
                 .build();
     }
 }

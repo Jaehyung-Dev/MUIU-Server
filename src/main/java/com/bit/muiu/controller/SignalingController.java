@@ -1,27 +1,34 @@
-// src/main/java/com/yourproject/controller/SignalingController.java
-package com.bit.muiu.controller;
-
-import com.bit.muiu.service.SignalingService;
+package com.bit.muiu.controller;// SignalingController.java
+import com.bit.muiu.dto.SignalMessage;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.stereotype.Controller;
-import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class SignalingController {
 
-    private final SignalingService signalingService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public SignalingController(SignalingService signalingService) {
-        this.signalingService = signalingService;
+    public SignalingController(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
     }
 
-    @MessageMapping("/sendSDP")
-    public void handleSDP(@Payload String sdp, String roomId) {
-        signalingService.processSDP(sdp, roomId);
+    @MessageMapping("/sendOffer")
+    @SendTo("/topic/offer")
+    public SignalMessage sendOffer(SignalMessage message) {
+        return message;
     }
 
-    @MessageMapping("/sendICE")
-    public void handleICE(@Payload String iceCandidate, String roomId) {
-        signalingService.processICE(iceCandidate, roomId);
+    @MessageMapping("/sendAnswer")
+    @SendTo("/topic/answer")
+    public SignalMessage sendAnswer(SignalMessage message) {
+        return message;
+    }
+
+    @MessageMapping("/sendIceCandidate")
+    @SendTo("/topic/candidate")
+    public SignalMessage sendIceCandidate(SignalMessage message) {
+        return message;
     }
 }
