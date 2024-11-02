@@ -18,4 +18,6 @@ public class FundRecordDto {
     private Date fundDate; // 기부 날짜
     private String title;
     private String username;
+    private String fundName;
+    private String message;
 }
