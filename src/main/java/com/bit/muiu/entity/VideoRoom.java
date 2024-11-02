@@ -56,10 +56,10 @@ public class VideoRoom {
                 .build();
     }
 
-    @PostPersist
-    public void afterInsert() {
-        CounselService counselService = ApplicationContextProvider.getBean(CounselService.class);
-        counselService.saveCounsel(this.toCounsel());
-    }
+//    @PostPersist
+//    public void afterInsert() {
+//        CounselService counselService = ApplicationContextProvider.getBean(CounselService.class);
+//        // counselService.saveCounsel(this.toCounsel());
+//    }
 
 }
