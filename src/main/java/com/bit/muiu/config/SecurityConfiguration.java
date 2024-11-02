@@ -62,7 +62,8 @@ public class SecurityConfiguration {
                             "/api/call/**",
                             "/call/**",
                             "/my-websocket",
-                            "/mind-column").permitAll();
+                            "/mind-column",
+                            "/ai-counseling").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
