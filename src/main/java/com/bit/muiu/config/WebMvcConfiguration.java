@@ -9,7 +9,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-//                .allowedOrigins("https://www.마음이음.site")  // 허용할 프론트엔드 주소를 명시
+//                .allowedOrigins("http://localhost:3000")  // 허용할 프론트엔드 주소를 명시
 //                .allowedOrigins("http://localhost:3000")  // 허용할 프론트엔드 주소를 명시/**/
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
