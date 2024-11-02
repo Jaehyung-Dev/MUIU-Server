@@ -52,17 +52,15 @@ public class SecurityConfiguration {
                             "/sms/send/**",
                             "/ws/**", // WebSocket 경로 추가
                             "/topic/**", // STOMP 토픽 경로 추가
-                            "/ai-counseling",   // 기능구현 완성할 때까지만 임시등록
                             "/members/counselNum/**",
-                            "/mind-column",
-                            "/ai-counseling",
                             "/members/naver-callback",
                             "/chat/partner/**",
                             "/diaries/user/**",
                             "/app/chat/**",
                             "/chat/**",
                             "/call/**",
-                            "/my-websocket").permitAll();
+                            "/my-websocket",
+                            "/mind-column").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
                 .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
