@@ -57,8 +57,8 @@ COPY supervisord.conf /etc/supervisord.conf
 # Spring Boot와 Nginx 포트 노출
 EXPOSE 9090 80 443
 
-# JAVA_OPTS 환경 변수 설정
-ENV JAVA_OPTS="-Xmx256m -Xms128m"
+## JAVA_OPTS 환경 변수 설정
+#ENV JAVA_OPTS="-Xmx256m -Xms128m"
 
 # Supervisor를 사용해 Nginx와 Spring Boot를 동시에 실행
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
