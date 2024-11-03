@@ -1,8 +1,8 @@
 # Stage 1: Build the application
 FROM openjdk:17-jdk-alpine AS build
 WORKDIR /app
-# JAR 파일이 Dockerfile과 같은 디렉토리에 있는 경우
-COPY muiu-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY build/libs/muiu-0.0.1-SNAPSHOT.jar /app/app.jar
+
 
 # Stage 2: Nginx + Spring Boot
 FROM nginx:alpine
