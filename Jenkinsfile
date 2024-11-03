@@ -1,31 +1,36 @@
+// Jenkinsfile
 pipeline {
     agent any
-    environment {
-        DOCKER_CREDENTIAL_ID = 'dockerhub-credentials'  // Jenkins에서 등록한 자격 증명 ID
-        DOCKER_IMAGE = 'soojeongmin/muiu-back'  // Docker Hub 이미지 이름
-        DOCKER_TAG = 'latest'  // 이미지 태그
-    }
+
     stages {
-        stage('Build') {
+        stage('Clone Repository') {
             steps {
-                echo 'Building Spring Boot Application...'
-                sh './gradlew clean build'  // Gradle을 사용하여 빌드 수행
+                // 소스 코드 클론
+                git 'https://github.com/your-repository/muiu-back.git'
             }
         }
-        stage('Build Docker Image') {
+        
+        stage('Build') {
             steps {
-                echo 'Building Docker Image...'
+                // 빌드 및 JAR 생성
+                sh './gradlew clean build'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                // Docker 이미지 생성
                 script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}", ".")
+                    docker.build("soojeongmin/muiu-back:latest", "-f Dockerfile .")
                 }
             }
         }
+
         stage('Push to Docker Hub') {
             steps {
-                echo 'Pushing Docker Image to Docker Hub...'
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIAL_ID}") {
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
+                withDockerRegistry(credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/') {
+                    script {
+                        docker.image("soojeongmin/muiu-back:latest").push()
                     }
                 }
             }
