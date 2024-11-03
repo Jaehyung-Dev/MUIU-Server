@@ -6,7 +6,7 @@ COPY build/libs/muiu-0.0.1-SNAPSHOT.jar /app/app.jar
 
 # Stage 2: Nginx + Spring Boot
 FROM nginx:alpine
-COPY /root/nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=build /app/app.jar /app/app.jar
 RUN apk add --no-cache openjdk17-jre supervisor
 COPY supervisord.conf /etc/supervisord.conf
