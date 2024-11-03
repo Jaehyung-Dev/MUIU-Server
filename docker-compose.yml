@@ -1,0 +1,17 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  app:
+    image: soojeongmin/muiu-back:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
