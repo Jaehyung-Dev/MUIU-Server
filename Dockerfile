@@ -1,15 +1,25 @@
-# Stage 1: Build the application
-FROM openjdk:17-jdk-alpine AS build
-WORKDIR /app
-COPY build/libs/muiu-0.0.1-SNAPSHOT.jar /app/app.jar
+# Dockerfile
+FROM openjdk:17-jdk-slim
 
+# 환경 설정
+ENV APP_HOME=/app
+WORKDIR $APP_HOME
 
-# Stage 2: Nginx + Spring Boot
-FROM nginx:alpine
+# JAR 파일 복사
+COPY build/libs/muiu-back.jar app.jar
+
+# Nginx 설치
+RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
+
+# Nginx와 Supervisor 설정 복사
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY --from=build /app/app.jar /app/app.jar
-RUN apk add --no-cache openjdk17-jre supervisor
 COPY supervisord.conf /etc/supervisord.conf
-EXPOSE 9090 80 443
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
 
+# Supervisord 설치
+RUN apt-get update && apt-get install -y supervisor
+
+# 애플리케이션 실행 포트 노출
+EXPOSE 9090
+
+# Supervisor를 통해 Spring Boot 및 Nginx 실행
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
