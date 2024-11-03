@@ -1,6 +1,6 @@
 server:
   port: 9090
-  server.address=0.0.0.0
+  address: 0.0.0.0
 
 spring:
   websocket:
