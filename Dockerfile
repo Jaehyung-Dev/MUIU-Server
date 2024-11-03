@@ -3,6 +3,13 @@ FROM openjdk:17-jdk-alpine AS build
 WORKDIR /app
 COPY build/libs/muiu-0.0.1-SNAPSHOT.jar /app/app.jar
 
+# Stage 2: Nginx + Spring Boot
+FROM nginx:alpine
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /app/app.jar /app/app.jar
+RUN apk add --no-cache openjdk17-jre supervisor
+COPY supervisord.conf /etc/supervisord.conf
+
 # 환경 변수 설정
 ENV SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME}
 ENV SERVER_PORT=${SERVER_PORT}
@@ -38,12 +45,5 @@ ENV CLOVA_API_KEY=${CLOVA_API_KEY}
 ENV CLOVA_API_KEY_PRIMARY_VAL=${CLOVA_API_KEY_PRIMARY_VAL}
 ENV CLOVA_REQUEST_ID=${CLOVA_REQUEST_ID}
 
-# Stage 2: Nginx + Spring Boot
-FROM nginx:alpine
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY --from=build /app/app.jar /app/app.jar
-RUN apk add --no-cache openjdk17-jre supervisor
-COPY supervisord.conf /etc/supervisord.conf
 EXPOSE 9090 80 443
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
-
