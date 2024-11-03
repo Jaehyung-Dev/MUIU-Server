@@ -1,5 +1,3 @@
-ENV SPRING_APPLICATION_JSON='{"server.port":9090, "server.address":"0.0.0.0"}'
-
 # Stage 1: Build the application
 FROM openjdk:17-jdk-alpine AS build
 WORKDIR /app
