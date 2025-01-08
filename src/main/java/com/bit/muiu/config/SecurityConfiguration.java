@@ -18,8 +18,8 @@ import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
 
-@Configuration
-@EnableWebSecurity
+@Configuration // 스프링에서 Configuration 클래스로 관리되기 위한 어노테이션
+@EnableWebSecurity // Spring Security의 보안 설정을 커스터마이징할 수 있는 구성을 활성화
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -32,10 +32,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(cors -> {
-
-                })
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // JWT 토큰 인증 방식은 csrf 방지 설정이 필요없음
                 .httpBasic(httpSecurityHttpBasicConfigurer -> {
                     httpSecurityHttpBasicConfigurer.disable();
                 })
@@ -65,7 +62,6 @@ public class SecurityConfiguration {
                             "/mind-column").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
-                .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
     }
 }
