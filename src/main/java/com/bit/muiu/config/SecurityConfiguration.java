@@ -32,6 +32,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
+                .cors(httpSecurityCorsConfigurer -> {}) // 커스터마이징 없이 기본 CORS 설정 사용
                 .csrf(AbstractHttpConfigurer::disable) // JWT 토큰 인증 방식은 csrf 방지 설정이 필요없음
                 .httpBasic(httpSecurityHttpBasicConfigurer -> {
                     httpSecurityHttpBasicConfigurer.disable();
@@ -62,6 +63,7 @@ public class SecurityConfiguration {
                             "/mind-column").permitAll();
                     authorizationManagerRequestMatcherRegistry.anyRequest().authenticated();
                 })
+                .addFilterAt(jwtAuthenticationFilter, CorsFilter.class)
                 .build();
     }
 }

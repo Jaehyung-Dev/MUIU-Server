@@ -1,8 +1,8 @@
 package com.bit.muiu.controller;
 
+import com.bit.muiu.entity.CustomUserDetails;
 import com.bit.muiu.entity.Member;
 import com.bit.muiu.repository.MemberRepository;
-import com.bit.muiu.service.CustomUserDetails;
 import com.bit.muiu.service.NaverCloudStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
